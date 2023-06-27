@@ -47,29 +47,7 @@ public:
             break;
 
             default:
-            return TaskStatus::NEW;
-            break;
-        } 
-    }
-
-    TaskStatus GetPreviousStatus(const TaskStatus current_status)
-    {
-        switch(current_status)
-        {
-            case TaskStatus::DONE:
-            return TaskStatus::TESTING;
-            break;
-
-            case TaskStatus::TESTING:
-            return TaskStatus::IN_PROGRESS;
-            break;
-
-            case TaskStatus::IN_PROGRESS:
-            return TaskStatus::NEW;
-            break;
-
-            default:
-            return TaskStatus::NEW;
+            return TaskStatus::DONE;
             break;
         } 
     }
@@ -94,22 +72,26 @@ public:
         
         for(auto &[status, count] : person_info_.at(person))
         {
-            if(status == TaskStatus::DONE) break;
+            if(status == TaskStatus::DONE && task_count == 0) break;
             
             if(task_count > count)
             {
                 tasks_to_update[GetNextStatus(status)] = count;
-                untouched_tasks[status] += 0;
                 task_count -= count;
-                count += tasks_to_update[GetPreviousStatus(status)] - tasks_to_update[GetNextStatus(status)];
             }
             else
             {
-                tasks_to_update[GetNextStatus(status)] = count;
-                untouched_tasks[status] = count - task_count;
+                tasks_to_update[GetNextStatus(status)] = task_count;
                 task_count = 0;
-                count += tasks_to_update[GetPreviousStatus(status)] - tasks_to_update[GetNextStatus(status)];
             }
+        }
+
+        for(auto &[status, count] : person_info_.at(person))
+        {
+            if(status == TaskStatus::DONE) break;
+
+            untouched_tasks[status] = count - tasks_to_update[GetNextStatus(status)];
+            count += tasks_to_update[status] - tasks_to_update[GetNextStatus(status)];
         }
  
         return tuple(tasks_to_update, untouched_tasks);
