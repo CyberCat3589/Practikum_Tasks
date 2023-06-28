@@ -78,13 +78,14 @@ public:
             
             if(task_count > count)
             {
-                tasks_to_update[GetNextStatus(status)] = count;
                 task_count -= count;
+                tasks_to_update[GetNextStatus(status)] = count;
             }
             else
             {
                 tasks_to_update[GetNextStatus(status)] = task_count;
-                task_count = 0;
+                break;
+                //task_count = 0;
             }
         }
 
