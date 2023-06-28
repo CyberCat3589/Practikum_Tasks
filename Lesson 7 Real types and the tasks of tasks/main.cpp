@@ -72,7 +72,6 @@ public:
         {
             if(status == TaskStatus::DONE)
             {
-                count += tasks_to_update[status];
                 break;
             }
             
@@ -85,13 +84,16 @@ public:
             {
                 tasks_to_update[GetNextStatus(status)] = task_count;
                 break;
-                //task_count = 0;
             }
         }
 
         for(auto &[status, count] : person_info_.at(person))
         {
-            if(status == TaskStatus::DONE) break;
+            if(status == TaskStatus::DONE)
+            {
+                count += tasks_to_update[status];
+                break;
+            }
 
             untouched_tasks[status] = count - tasks_to_update[GetNextStatus(status)];
             count += tasks_to_update[status] - tasks_to_update[GetNextStatus(status)];
