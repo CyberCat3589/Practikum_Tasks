@@ -2,6 +2,7 @@
 #include <map>
 #include <string>
 #include <vector>
+
 using namespace std;
 template <typename Term>
 map<Term, int> ComputeTermFreqs(const vector<Term>& terms) {
@@ -11,8 +12,23 @@ map<Term, int> ComputeTermFreqs(const vector<Term>& terms) {
     }
     return term_freqs;
 }
+
 pair<string, int> FindMaxFreqAnimal(const vector<pair<string, int>>& animals) {
     // верните животного с максимальной частотой
+    pair<string, int> frequent_animal;
+
+    //map<pair<string, int>, int> res_func = ComputeTermFreqs(animals);
+
+    for(auto [name_age, freq] : ComputeTermFreqs(animals))
+    {
+        if(frequent_animal.second < freq)
+        {
+            frequent_animal = name_age;
+        }
+        //cout << name_age.first << " " << freq << endl;
+    }
+
+    return frequent_animal;
 }
 
 int main() {
