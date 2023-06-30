@@ -6,9 +6,19 @@ using namespace std;
 template <typename Term>
 ostream& operator<<(ostream& out, const vector<Term>& container)
 {
+    bool first_iter = true;
+
     for(auto element : container)
     {
-        out << element << " "s;
+        if(first_iter)
+        {
+            out << element;
+            first_iter = false;
+        }
+        else
+        {
+            out << ", "s << element;
+        }
     }
 
     return out;
