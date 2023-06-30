@@ -4,9 +4,8 @@
 
 using namespace std;
 
-// для векторов
-template <typename Term>
-ostream& operator<<(ostream& out, const vector<Term>& container)
+template <typename Container>
+void Print(ostream& out, const Container& container)
 {
     bool first_iter = true;
 
@@ -22,7 +21,15 @@ ostream& operator<<(ostream& out, const vector<Term>& container)
             out << ", "s << element;
         }
     }
+}
 
+// для векторов
+template <typename Term>
+ostream& operator<<(ostream& out, const vector<Term>& container)
+{
+    out << '[';
+    Print(out, container);
+    out << ']';
     return out;
 }
 
@@ -30,31 +37,18 @@ ostream& operator<<(ostream& out, const vector<Term>& container)
 template <typename Term>
 ostream& operator<<(ostream& out, const set<Term>& container)
 {
-    bool first_iter = true;
-
-    for(auto element : container)
-    {
-        if(first_iter)
-        {
-            out << element;
-            first_iter = false;
-        }
-        else
-        {
-            out << ", "s << element;
-        }
-    }
-
+    out << '{';
+    Print(out, container); 
+    out << '}';
     return out;
 }
 
 int main() 
 {
-    // const vector<int> ages = {10, 5, 2, 12};
-    // cout << ages << endl;
-
     const set<string> cats = {"Мурка"s, "Белка"s, "Георгий"s, "Рюрик"s};
     cout << cats << endl;
+    const vector<int> ages = {10, 5, 2, 12};
+    cout << ages << endl;
 
     return 0;
 }
