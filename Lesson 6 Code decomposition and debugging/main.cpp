@@ -95,6 +95,7 @@ struct StopsForBusResponse {
     vector<string> stops;
     bool no_bus = false;
     bool no_interchange = false;
+    vector<string> other_buses;
 };
 
 ostream& operator<<(ostream& os, const StopsForBusResponse& r) {
@@ -105,18 +106,23 @@ ostream& operator<<(ostream& os, const StopsForBusResponse& r) {
     }
     else
     {
-        os << "Bus "s << r.bus << ':';
-        if(r.no_interchange)
+        for(auto& stop : r.stops)
         {
-            os << " no interchange"s;
-        }
-        else
-        {
-            for(auto& stop : r.stops)
+            os << "Stop "s << stop << ": "s;
+            
+            if(r.no_interchange)
             {
-                os << " "s << stop;
+                os << " no interchange"s;
+            }
+            else
+            {
+                for(auto& other_bus : r.other_buses)
+                {
+                    os << other_bus << " "s;
+                }
             }
         }
+        os << endl;
     }
 
     return os;
@@ -191,8 +197,15 @@ public:
                 }
                 else
                 {
-                    stops_for_bus_response.bus = bus;
                     stops_for_bus_response.stops = stops_to_buses_.at(bus);
+
+                    for (const string& other_bus : buses_to_stops_.at(stop)) 
+                    {
+                        if (bus != other_bus) 
+                        {
+                            stops_for_bus_response.other_buses.push_back(other_bus);
+                        }
+                    }
                 }
             }
             
