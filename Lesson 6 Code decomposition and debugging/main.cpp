@@ -106,8 +106,10 @@ ostream& operator<<(ostream& os, const StopsForBusResponse& r) {
     }
     else
     {
+        int i = r.stops.size();
         for(auto& stop : r.stops)
         {
+            --i;
             os << "Stop "s << stop << ": "s;
             
             if(r.no_interchange)
@@ -121,8 +123,10 @@ ostream& operator<<(ostream& os, const StopsForBusResponse& r) {
                     os << other_bus << " "s;
                 }
             }
+            if(i != 0) os << endl;
+            
         }
-        os << endl;
+        
     }
 
     return os;
@@ -147,6 +151,8 @@ ostream& operator<<(ostream& os, const AllBusesResponse& r) {
         {
             os << " " << stop;
         }
+
+        os << endl;
     }
 
     return os;
