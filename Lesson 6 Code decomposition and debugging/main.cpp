@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include  <algorithm>
 
 using namespace std;
 
@@ -77,11 +78,11 @@ ostream& operator<<(ostream& os, const BusesForStopResponse& r) {
     }
     else
     {
-        os << "Stop "s << r.stop << ':';
+        //os << "Stop "s << r.stop << ':';
 
         for(auto& bus : r.buses)
         {
-            os << " "s << bus;
+            os << bus  << " "s;
         }
 
     }
@@ -91,44 +92,32 @@ ostream& operator<<(ostream& os, const BusesForStopResponse& r) {
 
 struct StopsForBusResponse {
     // Наполните полями эту структуру
-    string bus;
-    vector<string> stops;
-    bool no_bus = false;
-    bool no_interchange = false;
-    vector<string> other_buses;
+    vector<pair<string, vector<string>>> stop_for_bus_;
 };
 
 ostream& operator<<(ostream& os, const StopsForBusResponse& r) {
     // Реализуйте эту функцию
-    if(r.no_bus)
+    if( r.stop_for_bus_.empty() )
     {
-        os << "No bus"s;
+        os << "No bus";
+        return os;
     }
-    else
+ 
+    int size = r.stop_for_bus_.size();
+    for(const auto &[stop, buses] : r.stop_for_bus_)
     {
-        int i = r.stops.size();
-        for(auto& stop : r.stops)
+        os << "Stop " << stop << ": ";
+ 
+        for(const auto &bus : buses)
         {
-            --i;
-            os << "Stop "s << stop << ": "s;
-            
-            if(r.no_interchange)
-            {
-                os << " no interchange"s;
-            }
-            else
-            {
-                for(auto& other_bus : r.other_buses)
-                {
-                    os << other_bus << " "s;
-                }
-            }
-            if(i != 0) os << endl;
-            
+            os << bus << " ";   
         }
-        
+        --size;
+        if( size != 0)
+        {
+            os << endl;
+        }
     }
-
     return os;
 }
 
@@ -144,15 +133,17 @@ ostream& operator<<(ostream& os, const AllBusesResponse& r) {
         os << "No buses"s;
     }
 
+    int i = r.all_buses.size();
     for(const auto& [bus, stops] : r.all_buses)
     {
+        --i;
         os << "Bus " << bus << ':';
         for(const auto& stop : stops)
         {
             os << " " << stop;
         }
 
-        os << endl;
+        if(i != 0) os << endl;
     }
 
     return os;
@@ -165,69 +156,66 @@ public:
         // Реализуйте этот метод
         for (auto& stop : stops)
         {
-            stops_to_buses_[bus].push_back(stop);
-            buses_to_stops_[stop].push_back(bus);
+            buses_[bus].push_back(stop);
+            stops_[stop].push_back(bus);
         }
     }
 
     BusesForStopResponse GetBusesForStop(const string& stop) const {
         // Реализуйте этот метод
         BusesForStopResponse buses_for_stop_response;
-        if(buses_to_stops_.count(stop) <= 0)
+        if(stops_.count(stop) <= 0)
         {
             buses_for_stop_response.no_stop = true;
         }
         else
         {
             buses_for_stop_response.stop = stop;
-            buses_for_stop_response.buses = buses_to_stops_.at(stop);
+            buses_for_stop_response.buses = stops_.at(stop);
         }
         return buses_for_stop_response;
     }
 
     StopsForBusResponse GetStopsForBus(const string& bus) const {
-        // Реализуйте этот метод
+        
         StopsForBusResponse stops_for_bus_response;
-
-        if(stops_to_buses_.count(bus) <= 0)
+        
+        if( buses_.count(bus) )
         {
-            stops_for_bus_response.no_bus = true;
-        }
-        else
-        {
-            for(auto& stop : stops_to_buses_.at(bus))
+            for( const auto &stop : buses_.at(bus) )
             {
-                if(buses_to_stops_.at(stop).size() == 1)
+                if( stops_.at(stop).size() == 1)
                 {
-                    stops_for_bus_response.no_interchange = true;
+                    stops_for_bus_response.stop_for_bus_.push_back({stop, {"no interchange"}});
                 }
                 else
                 {
-                    stops_for_bus_response.stops = stops_to_buses_.at(bus);
-
-                    for (const string& other_bus : buses_to_stops_.at(stop)) 
-                    {
-                        if (bus != other_bus) 
+                    auto m_buses_of_stop = stops_.at(stop);
+                    vector<string> m_buses;
+                    for_each(m_buses_of_stop.begin(), m_buses_of_stop.end(), [&bus, &m_buses, &stop](const string &data) {
+                        if( data != bus )
                         {
-                            stops_for_bus_response.other_buses.push_back(other_bus);
+                            m_buses.push_back(data);
                         }
-                    }
+                    });
+                    stops_for_bus_response.stop_for_bus_.push_back({stop, m_buses});
                 }
             }
-            
         }
+ 
         return stops_for_bus_response;
+ 
     }
 
     AllBusesResponse GetAllBuses() const {
         // Реализуйте этот метод
         AllBusesResponse all_buses_response;
-        all_buses_response.all_buses = stops_to_buses_;
+        all_buses_response.all_buses = buses_;
         return all_buses_response;
     }
 
 private:
-    map<string, vector<string>> buses_to_stops_, stops_to_buses_;
+    map<string, vector<string>> buses_, stops_;
 
 };
 
