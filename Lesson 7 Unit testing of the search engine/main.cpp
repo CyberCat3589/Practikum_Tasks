@@ -314,6 +314,13 @@ void TestStopWords() {
     assert(!server.FindTopDocuments("a dog found in the cat").empty());
 }
 
+void TestMinusWords() {
+    SearchServer search_server;
+    search_server.AddDocument(0, "white cat and fashionable collar"s, DocumentStatus::ACTUAL, {8, -3});
+    vector<Document> results = search_server.FindTopDocuments("cat -white"s);
+    assert(results.empty());
+}
+
 void TestMatching() {
     int doc_id = 42;
     SearchServer server = GetTestSearchServer(doc_id, "cat in the city"s, {1, 2, 3});
@@ -407,6 +414,7 @@ void TestSearchServer() {
     TestExcludeStopWordsFromAddedDocumentContent();
     TestAddDocument();
     TestStopWords();
+    TestMinusWords();
     TestMatching();
     TestRelevanceSorting();
     TestRating();
