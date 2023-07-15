@@ -8,6 +8,61 @@
 
 using namespace std;
 
+template <typename Key, typename Value>
+ostream& operator<<(ostream& out, pair<Key, Value> pr)
+{
+    return out << pr.first << ": "s << pr.second;
+}
+
+template <typename C>
+ostream& Print(ostream& out, C& container)
+{
+    bool is_first = true;
+    for(const auto& elem : container)
+    {
+        if(is_first)
+        {
+            out << elem;
+            is_first = false;
+            continue;
+        }
+
+        out << ", "s << elem;
+    }
+
+    return out;
+}
+
+template <typename E>
+ostream& operator<<(ostream& out, vector<E> container)
+{
+    out << '[';
+    Print(out, container);
+    out << ']';
+
+    return out;
+}
+
+template <typename E>
+ostream& operator<<(ostream& out, set<E> container)
+{
+    out << '{';
+    Print(out, container);
+    out << '}';
+
+    return out;
+}
+
+template <typename Key, typename Value>
+ostream& operator<<(ostream& out, map<Key, Value> container)
+{
+    out << '{';
+    Print(out, container);
+    out << '}';
+
+    return out;
+}
+
 template <typename T, typename U>
 void AssertEqualImpl(const T& t, const U& u, const string& t_str, const string& u_str, const string& file,
                      const string& func, unsigned line, const string& hint) {
