@@ -10,17 +10,13 @@ public:
 
     Rational() = default;
 
-    Rational(int numerator)
+    Rational(int numerator) : numerator_(numerator), denominator_(1) {}
+
+    Rational(int numerator, int denominator) : numerator_(numerator), denominator_(denominator)
     {
         numerator_ = numerator;
-        denominator_ = 1;
-    }
-
-    Rational(int numerator, int denominator)
-    {
-        pair<int, int> fr = ShortenFraction(numerator, denominator);
-        numerator_ = fr.first;
-        denominator_ = fr.second;
+        denominator_ = denominator;
+        Normalize();
     }
 
     int Numerator() const 
@@ -34,26 +30,18 @@ public:
     }
 
 private:
+    void Normalize() {
+        if (denominator_ < 0) {
+            numerator_ = -numerator_;
+            denominator_ = -denominator_;
+        }
+        const int divisor = gcd(numerator_, denominator_);
+        numerator_ /= divisor;
+        denominator_ /= divisor;
+    }
+
     int numerator_ = 0;
     int denominator_ = 1;
-
-    pair<int, int> ShortenFraction(const int& numerator, const int& denominator)
-    {
-        pair<int, int> result_fraction(numerator, denominator);
-
-        int divisor = gcd(numerator, denominator);
-
-        if(denominator < 0)
-        {
-            result_fraction.first *= -1;
-            result_fraction.second *= -1;
-        }
-
-        result_fraction.first /= divisor;
-        result_fraction.second /= divisor;
-        
-        return result_fraction;
-    }
 };
 
 Rational Add(Rational r1, Rational r2) {
@@ -63,7 +51,7 @@ Rational Add(Rational r1, Rational r2) {
     return Rational{numerator, denominator};
 }
 int main() {
-    Rational zero;     // Дробь 0/1 = 0
+    //Rational zero;     // Дробь 0/1 = 0
     const Rational seven(7); // Дробь 7/1 = 7
     const Rational one_third(1, 3); // Дробь 1/3
     vector<Rational> numbers;
