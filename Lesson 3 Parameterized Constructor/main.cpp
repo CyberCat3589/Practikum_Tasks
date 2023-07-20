@@ -116,6 +116,16 @@ Rational operator-(Rational left, Rational right)
     return left -= right;
 }
 
+Rational operator*(Rational left, Rational right)
+{
+    return left *= right;
+}
+
+Rational operator/(Rational left, Rational right)
+{
+    return left /= right;
+}
+
 int main() 
 {
     Rational rational1, rational2;
@@ -130,11 +140,16 @@ int main()
     cout << "Результат вычитания дробей:" << endl;
     cout << rational1 - rational2 << endl;
 
+    cout << "Результат умножения дробей:" << endl;
+    cout << rational1 * rational2 << endl;
+
+    cout << "Результат деления дробей:" << endl;
+    cout << rational1 / rational2 << endl;
+
     cout << "Результат операции унарного плюса:" << endl;
     cout << +rational1 << endl;
 
     cout << "Результат операции унарного минуса:" << endl;
     cout << -rational2 << endl;
 
-    cout << rational1 << " "s << rational2;
 }
