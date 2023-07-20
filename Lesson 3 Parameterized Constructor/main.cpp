@@ -126,14 +126,43 @@ Rational operator/(Rational left, Rational right)
     return left /= right;
 }
 
+bool operator==(Rational left, Rational right)
+{
+    return (left.Numerator() == right.Numerator()) && (left.Denominator() == right.Denominator());
+}
+
+bool operator!=(Rational left, Rational right)
+{
+    return !(left == right);
+}
+
+bool operator<(Rational left, Rational right)
+{
+    return (left.Numerator() * right.Denominator()) < (right.Numerator() * left.Denominator());
+}
+
+bool operator>(Rational left, Rational right)
+{
+    return (left.Numerator() * right.Denominator()) > (right.Numerator() * left.Denominator());
+}
+
+bool operator<=(Rational left, Rational right)
+{
+    return (left < right) || (left == right);
+}
+
+bool operator>=(Rational left, Rational right)
+{
+    return (left > right) || (left == right);
+}
+
 int main() 
 {
     Rational rational1, rational2;
-    cout << "Введите первую дробь:" << endl;
-    cin >> rational1;
-    cout << "Введите вторую дробь:" << endl;
-    cin >> rational2;
-
+    
+    cout << "Введите две дроби:" << endl;
+    cin >> rational1 >> rational2;
+    /*
     cout << "Результат сложения дробей:" << endl;
     cout << rational1 + rational2 << endl;
 
@@ -151,5 +180,25 @@ int main()
 
     cout << "Результат операции унарного минуса:" << endl;
     cout << -rational2 << endl;
+    */
+    cout << boolalpha;
+
+    cout << "Результат операции ==:" << endl;
+    cout << (rational1 == rational2) << endl;
+
+    cout << "Результат операции !=:" << endl;
+    cout << (rational1 != rational2) << endl;
+
+    cout << "Результат операции <:" << endl;
+    cout << (rational1 < rational2) << endl;
+
+    cout << "Результат операции >:" << endl;
+    cout << (rational1 > rational2) << endl;
+
+    cout << "Результат операции <=:" << endl;
+    cout << (rational1 <= rational2) << endl;
+
+    cout << "Результат операции >=:" << endl;
+    cout << (rational1 >= rational2) << endl;
 
 }
