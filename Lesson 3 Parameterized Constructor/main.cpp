@@ -60,6 +60,16 @@ ostream& operator<<(ostream& out, const Rational& rational)
     return out;
 }
 
+Rational operator+(Rational rational)
+{
+    return rational;
+}
+
+Rational operator-(Rational rational)
+{
+    return {-rational.Numerator(), rational.Denominator()};
+}
+
 Rational operator+(Rational left, Rational right)
 {
     int numerator = left.Numerator() * right.Denominator() + right.Numerator() * left.Denominator();
@@ -89,6 +99,12 @@ int main()
 
     cout << "Результат вычитания дробей:" << endl;
     cout << rational1 - rational2 << endl;
+
+    cout << "Результат операции унарного плюса:" << endl;
+    cout << +rational1 << endl;
+
+    cout << "Результат операции унарного минуса:" << endl;
+    cout << -rational2 << endl;
 
     cout << rational1 << " "s << rational2;
 }
