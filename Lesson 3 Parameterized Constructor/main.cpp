@@ -47,8 +47,8 @@ private:
 istream& operator>>(istream& in, Rational& rational)
 {
     int n, d;
-    char div;
-    in >> n >> div >> d;
+    char slash;
+    in >> n >> slash >> d;
     rational = Rational(n, d);
     
     return in;
@@ -60,9 +60,35 @@ ostream& operator<<(ostream& out, const Rational& rational)
     return out;
 }
 
+Rational operator+(Rational left, Rational right)
+{
+    int numerator = left.Numerator() * right.Denominator() + right.Numerator() * left.Denominator();
+    int denominator = left.Denominator() * right.Denominator();
+
+    return {numerator, denominator};
+}
+
+Rational operator-(Rational left, Rational right)
+{
+    int numerator = left.Numerator() * right.Denominator() - right.Numerator() * left.Denominator();
+    int denominator = left.Denominator() * right.Denominator();
+
+    return {numerator, denominator};
+}
+
 int main() 
 {
     Rational rational1, rational2;
-    cin >> rational1 >> rational2;
+    cout << "Введите первую дробь:" << endl;
+    cin >> rational1;
+    cout << "Введите вторую дробь:" << endl;
+    cin >> rational2;
+
+    cout << "Результат сложения дробей:" << endl;
+    cout << rational1 + rational2 << endl;
+
+    cout << "Результат вычитания дробей:" << endl;
+    cout << rational1 - rational2 << endl;
+
     cout << rational1 << " "s << rational2;
 }
