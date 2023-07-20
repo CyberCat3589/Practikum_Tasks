@@ -29,6 +29,42 @@ public:
         return denominator_;
     }
 
+    Rational& operator+=(Rational right)
+    {
+        numerator_ = numerator_ * right.Denominator() + right.Numerator() * denominator_;
+        denominator_ = denominator_ * right.Denominator();
+        Normalize();
+
+        return *this;
+    }
+
+    Rational& operator-=(Rational right)
+    {
+        numerator_ = numerator_ * right.Denominator() - right.Numerator() * denominator_;
+        denominator_ = denominator_ * right.Denominator();
+        Normalize();
+
+        return *this;
+    }
+
+    Rational& operator*=(Rational right)
+    {
+        numerator_ *= right.Numerator();
+        denominator_ *= right.Denominator();
+        Normalize();
+
+        return *this;
+    }
+
+    Rational& operator/=(Rational right)
+    {
+        numerator_ = numerator_ * right.Denominator();
+        denominator_ = denominator_ * right.Numerator();
+        Normalize();
+
+        return *this;
+    }
+
 private:
     void Normalize() {
         if (denominator_ < 0) {
@@ -60,30 +96,24 @@ ostream& operator<<(ostream& out, const Rational& rational)
     return out;
 }
 
-Rational operator+(Rational rational)
+Rational operator+(Rational right)
 {
-    return rational;
+    return right;
 }
 
-Rational operator-(Rational rational)
+Rational operator-(Rational right)
 {
-    return {-rational.Numerator(), rational.Denominator()};
+    return {-right.Numerator(), right.Denominator()};
 }
 
 Rational operator+(Rational left, Rational right)
 {
-    int numerator = left.Numerator() * right.Denominator() + right.Numerator() * left.Denominator();
-    int denominator = left.Denominator() * right.Denominator();
-
-    return {numerator, denominator};
+    return left += right;
 }
 
 Rational operator-(Rational left, Rational right)
 {
-    int numerator = left.Numerator() * right.Denominator() - right.Numerator() * left.Denominator();
-    int denominator = left.Denominator() * right.Denominator();
-
-    return {numerator, denominator};
+    return left -= right;
 }
 
 int main() 
