@@ -15,6 +15,7 @@ public:
 
     Rational(int numerator, int denominator) : numerator_(numerator), denominator_(denominator)
     {
+        if(denominator == 0) throw domain_error("Создание дроби с 0 знаменателем!!!"s);
         numerator_ = numerator;
         denominator_ = denominator;
         Normalize();
