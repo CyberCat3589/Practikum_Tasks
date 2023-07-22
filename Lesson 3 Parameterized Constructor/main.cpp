@@ -2,6 +2,7 @@
 #include <numeric>
 #include <vector>
 #include <iostream>
+#include <stdexcept>
 
 using namespace std;
 
@@ -58,6 +59,8 @@ public:
 
     Rational& operator/=(Rational right)
     {
+        if(right.Numerator() == 0) throw invalid_argument("Деление на ноль запрешено торговой федерацией!!!"s);
+
         numerator_ = numerator_ * right.Denominator();
         denominator_ = denominator_ * right.Numerator();
         Normalize();
@@ -158,47 +161,25 @@ bool operator>=(Rational left, Rational right)
 
 int main() 
 {
-    Rational rational1, rational2;
-    
-    cout << "Введите две дроби:" << endl;
-    cin >> rational1 >> rational2;
-    /*
-    cout << "Результат сложения дробей:" << endl;
-    cout << rational1 + rational2 << endl;
-
-    cout << "Результат вычитания дробей:" << endl;
-    cout << rational1 - rational2 << endl;
-
-    cout << "Результат умножения дробей:" << endl;
-    cout << rational1 * rational2 << endl;
-
-    cout << "Результат деления дробей:" << endl;
-    cout << rational1 / rational2 << endl;
-
-    cout << "Результат операции унарного плюса:" << endl;
-    cout << +rational1 << endl;
-
-    cout << "Результат операции унарного минуса:" << endl;
-    cout << -rational2 << endl;
-    */
-    cout << boolalpha;
-
-    cout << "Результат операции ==:" << endl;
-    cout << (rational1 == rational2) << endl;
-
-    cout << "Результат операции !=:" << endl;
-    cout << (rational1 != rational2) << endl;
-
-    cout << "Результат операции <:" << endl;
-    cout << (rational1 < rational2) << endl;
-
-    cout << "Результат операции >:" << endl;
-    cout << (rational1 > rational2) << endl;
-
-    cout << "Результат операции <=:" << endl;
-    cout << (rational1 <= rational2) << endl;
-
-    cout << "Результат операции >=:" << endl;
-    cout << (rational1 >= rational2) << endl;
-
+    try 
+    {
+        const Rational three_fifth{3, 5};
+        const Rational zero;
+        cout << three_fifth << " / " << zero << " = " << (three_fifth / zero) << endl;
+    } 
+    catch (const invalid_argument& e) 
+    {
+        cout << "Ошибка: "s << e.what() << endl;
+    }
+    try 
+    {
+        Rational value{3, 5};
+        value /= Rational();
+        // Следующая строка не должна выполниться
+        cout << value << endl;
+    } 
+    catch (const invalid_argument& e) 
+    {
+        cout << "Ошибка: "s << e.what() << endl;
+    }
 }
