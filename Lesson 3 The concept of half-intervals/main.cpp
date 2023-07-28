@@ -31,10 +31,10 @@ void FindAndPrint(Container container, Element element)
     PrintRange(it, container.end());
 }
 
-template <typename Container, typename It>
-void EraseAndPrint(Container& container, It it)
+template <typename Container>
+void EraseAndPrint(Container& container, int index)
 {
-    it = container.erase(it);
+    auto it = container.erase(container.begin() + index);
     PrintRange(container.begin(), it);
     PrintRange(it, container.end());
 }
@@ -68,8 +68,13 @@ int main()
     set<string> unique_langs = {"Python"s, "Java"s, "C#"s, "Ruby"s, "C++"s};
     vector<string> langs = MakeVector(unique_langs.begin(), unique_langs.end());
     PrintRange(langs.begin(), langs.end());
-    */
+    
     vector<string> langs = {"Python"s, "Java"s, "C#"s, "Ruby"s, "C++"s};
     EraseAndPrint(langs, langs.begin());
+    */
+
+    vector<string> langs = {"Python"s, "Java"s, "C#"s, "Ruby"s, "C++"s};
+    EraseAndPrint(langs, 2);
+
     return 0;
 }
