@@ -31,9 +31,15 @@ void FindAndPrint(Container container, Element element)
     PrintRange(it, container.end());
 }
 
+template <typename It>
+auto MakeVector(It range_begin, It range_end)
+{
+    return vector(range_begin, range_end);
+}
 
 int main() 
 {
+    /*
     set<int> test = {1, 1, 1, 2, 3, 4, 5, 5};
     cout << "Test1"s << endl;
     FindAndPrint(test, 3);
@@ -50,4 +56,8 @@ int main()
     FindAndPrint(test_str, '-');
 
     cout<< "End of tests"s << endl;
+    */
+    set<string> unique_langs = {"Python"s, "Java"s, "C#"s, "Ruby"s, "C++"s};
+    vector<string> langs = MakeVector(unique_langs.begin(), unique_langs.end());
+    PrintRange(langs.begin(), langs.end());
 }
