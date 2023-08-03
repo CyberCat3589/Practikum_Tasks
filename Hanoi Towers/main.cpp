@@ -31,6 +31,15 @@ public:
     }
 
     // вы можете дописывать необходимые для вашего решения методы
+
+    void MoveDisks(int disks_num, Tower& destination, Tower& buffer) 
+    {
+        if (/*условие выхода ещё не выполнено*/) 
+        {
+            // действия из шага рекурсии
+        }
+    }
+
     void MoveTopTo(Tower& t) {
         int disk = disks_.size() - 1;
         try {
@@ -60,4 +69,18 @@ void SolveHanoi(vector<Tower>& towers) {
     // допишите функцию, чтобы на towers[0] было 0 дисков,
     // на towers[1] 0 дисков,
     // и на towers[2] было disks_num дисков
+}
+
+int main() 
+{
+    int towers_num = 3;
+    int disks_num = 3;
+    vector<Tower> towers;
+    // добавим в вектор три пустые башни
+    for (int i = 0; i < towers_num; ++i) {
+        towers.push_back(0);
+    }
+    // добавим на первую башню три кольца
+    towers[0].SetDisks(disks_num);
+    SolveHanoi(towers);
 }
