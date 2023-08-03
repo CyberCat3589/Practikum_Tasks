@@ -31,6 +31,17 @@ public:
     }
 
     // вы можете дописывать необходимые для вашего решения методы
+    void MoveTopTo(Tower& t) {
+        int disk = disks_.size() - 1;
+        try {
+            t.AddToTop(disks_[disk]);
+        }
+        catch (const invalid_argument& ia) {
+            cout << ia.what() << '\n';
+            throw;
+        }
+        disks_.pop_back();
+    }
 
 private:
     vector<int> disks_;
