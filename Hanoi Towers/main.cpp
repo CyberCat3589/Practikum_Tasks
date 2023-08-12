@@ -23,20 +23,6 @@ public:
         FillTower(disks_num);
     }
 
-    // добавляем диск на верх собственной башни
-    // обратите внимание на исключение, которое выбрасывается этим методом
-    void AddToTop(int disk) 
-    {
-        int top_disk_num = disks_.size() - 1;
-        if (0 != disks_.size() && disk >= disks_[top_disk_num]) 
-        {
-            throw invalid_argument("Невозможно поместить большой диск на маленький");
-        } else 
-        {
-            disks_.push_back(disk);
-        }
-    }
-
     // вы можете дописывать необходимые для вашего решения методы
 
     void MoveTower(int disks_num, Tower& tower1, Tower& tower2, Tower& temp)
@@ -46,26 +32,13 @@ public:
             return;
         }
         MoveTower(disks_num - 1, tower1, temp, tower2);
-        MoveTopTo(tower2);
+        MoveTopTo(tower1, tower2);
         MoveTower(disks_num - 1, temp, tower2, tower1);
     }
 
     void MoveDisks(int disks_num, Tower& destination, Tower& buffer) 
     {
         MoveTower(disks_num, *this, destination, buffer);
-    }
-
-    void MoveTopTo(Tower& t) 
-    {
-        int disk = disks_.size() - 1;
-        try {
-            t.AddToTop(disks_[disk]);
-        }
-        catch (const invalid_argument& ia) {
-            cout << ia.what() << '\n';
-            throw;
-        }
-        disks_.pop_back();
     }
 
     void ViewDisks()
@@ -96,6 +69,33 @@ private:
             disks_.push_back(i);
         }
     }
+
+    void AddToTop(int disk) 
+    {
+        int top_disk_num = disks_.size() - 1;
+        
+        if (0 != disks_.size() && (disk >= disks_[top_disk_num])) 
+        {
+            throw invalid_argument("Невозможно поместить большой диск на маленький");
+        } else 
+        {
+            disks_.push_back(disk);
+        }
+    }
+
+    void MoveTopTo(Tower& tower1, Tower& tower2) 
+    {
+        int disk = tower1.disks_.size() - 1;
+        try {
+            tower2.AddToTop(tower1.disks_[disk]);
+        }
+        catch (const invalid_argument& ia) {
+            cout << ia.what() << '\n';
+            throw;
+        }
+        tower1.disks_.pop_back();
+    }
+
 };
 
 void SolveHanoi(vector<Tower>& towers) 
