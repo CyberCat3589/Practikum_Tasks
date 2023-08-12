@@ -33,18 +33,26 @@ public:
             throw invalid_argument("Невозможно поместить большой диск на маленький");
         } else 
         {
-            // допишите этот метод и используйте его в вашем решении
+            disks_.push_back(disk);
         }
     }
 
     // вы можете дописывать необходимые для вашего решения методы
 
+    void MoveTower(int disks_num, Tower& tower1, Tower& tower2, Tower& temp)
+    {
+        if (disks_num == 0) 
+        {
+            return;
+        }
+        MoveTower(disks_num - 1, tower1, temp, tower2);
+        MoveTopTo(tower2);
+        MoveTower(disks_num - 1, temp, tower2, tower1);
+    }
+
     void MoveDisks(int disks_num, Tower& destination, Tower& buffer) 
     {
-        if (/*условие выхода ещё не выполнено*/) 
-        {
-            // действия из шага рекурсии
-        }
+        MoveTower(disks_num, *this, destination, buffer);
     }
 
     void MoveTopTo(Tower& t) 
@@ -58,6 +66,23 @@ public:
             throw;
         }
         disks_.pop_back();
+    }
+
+    void ViewDisks()
+    {
+        int disk = disks_.size();
+        if(disk == 0)
+        {
+            cout << "0 0 0" << endl;
+            return;
+        }
+        while(disk != 0)
+        {
+            cout << disk << " ";
+            --disk;
+        }
+
+        cout << endl;
     }
 
 private:
@@ -80,6 +105,17 @@ void SolveHanoi(vector<Tower>& towers)
     // допишите функцию, чтобы на towers[0] было 0 дисков,
     // на towers[1] 0 дисков,
     // и на towers[2] было disks_num дисков
+    towers[0].MoveDisks(disks_num, towers[2], towers[1]);
+}
+
+void ViewTowers(vector<Tower> towers)
+{
+    cout << "Башня 1: ";
+    towers[0].ViewDisks();
+    cout << "Башня 2: ";
+    towers[1].ViewDisks();
+    cout << "Башня 3: ";
+    towers[2].ViewDisks();
 }
 
 int main() 
@@ -94,5 +130,8 @@ int main()
     }
     // добавим на первую башню три кольца
     towers[0].SetDisks(disks_num);
+
+    ViewTowers(towers);
     SolveHanoi(towers);
+    ViewTowers(towers);
 }
