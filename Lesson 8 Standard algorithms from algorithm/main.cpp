@@ -51,7 +51,15 @@ vector<string> GetPermutations(It range_begin, It range_end)
 template <typename RandomIt>
 void MergeSort(RandomIt range_begin, RandomIt range_end)
 {
+    vector<typename RandomIt::value_type> temp(range_begin, range_end);
 
+    int range_length = range_end - range_begin;
+    auto mid = temp.begin() + range_length / 2;
+
+    if(distance(temp.begin(), mid) != 1) MergeSort(temp.begin(), mid);
+    if(distance(mid, temp.end()) != 1) MergeSort(mid, temp.end());
+
+    merge(temp.begin(), mid, mid, temp.end(), range_begin);
 }
 
 int main() 
