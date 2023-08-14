@@ -21,6 +21,15 @@ string PrintRangeToString(It range_begin, It range_end)
 }
 
 template <typename It>
+void PrintRange(It range_begin, It range_end) 
+{
+    for (auto it = range_begin; it != range_end; ++it) {
+        cout << *it << " "s;
+    }
+    cout << endl;
+}
+
+template <typename It>
 vector<string> GetPermutations(It range_begin, It range_end)
 {
     vector<string> result;
@@ -42,7 +51,7 @@ vector<string> GetPermutations(It range_begin, It range_end)
 template <typename RandomIt>
 void MergeSort(RandomIt range_begin, RandomIt range_end)
 {
-    
+
 }
 
 int main() 
