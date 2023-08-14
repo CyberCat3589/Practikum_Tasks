@@ -39,17 +39,25 @@ vector<string> GetPermutations(It range_begin, It range_end)
     return result;
 }
 
+template <typename RandomIt>
+void MergeSort(RandomIt range_begin, RandomIt range_end)
+{
+    
+}
+
 int main() 
 {
     /*vector<int> permutation(3);
     // iota             -> http://ru.cppreference.com/w/cpp/algorithm/iota
     // Заполняет диапазон последовательно возрастающими значениями
     iota(permutation.begin(), permutation.end(), 1);
-    */
+    
    vector<int> permutation = {2,1,3};
     auto result = GetPermutations(permutation.begin(), permutation.end());
     for (const auto& s : result) {
         cout << s;
     }
+    */
+   
     return 0;
 }
