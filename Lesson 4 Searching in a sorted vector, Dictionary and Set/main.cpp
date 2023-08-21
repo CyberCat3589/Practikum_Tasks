@@ -26,7 +26,16 @@ set<int>::const_iterator FindNearestElement(const set<int>& numbers, int border)
 template <typename RandomIt>
 pair<RandomIt, RandomIt> FindStartsWith(RandomIt range_begin, RandomIt range_end, char prefix) 
 {
+    string prefix_str = " ";
+    prefix_str[0] = prefix;
+
+    auto lower = lower_bound(range_begin, range_end, prefix_str);
+
+    ++prefix_str[0];
+
+    auto upper = upper_bound(range_begin, range_end, prefix_str);
     
+    return {lower, upper};
 }
 
 int main() 
