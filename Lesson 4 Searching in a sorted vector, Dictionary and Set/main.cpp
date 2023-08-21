@@ -33,7 +33,7 @@ pair<RandomIt, RandomIt> FindStartsWith(RandomIt range_begin, RandomIt range_end
 
     ++prefix_str[0];
 
-    RandomIt upper = upper_bound(range_begin, range_end, prefix_str);
+    RandomIt upper = lower_bound(range_begin, range_end, prefix_str);
     
     return {lower, upper};
 }
