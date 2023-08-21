@@ -29,11 +29,11 @@ pair<RandomIt, RandomIt> FindStartsWith(RandomIt range_begin, RandomIt range_end
     string prefix_str = " ";
     prefix_str[0] = prefix;
 
-    auto lower = lower_bound(range_begin, range_end, prefix_str);
+    RandomIt lower = lower_bound(range_begin, range_end, prefix_str);
 
     ++prefix_str[0];
 
-    auto upper = upper_bound(range_begin, range_end, prefix_str);
+    RandomIt upper = upper_bound(range_begin, range_end, prefix_str);
     
     return {lower, upper};
 }
