@@ -1,6 +1,8 @@
 #include <iostream>
 #include <vector>
 #include <cstdint>
+#include <numeric>
+#include <algorithm>
 
 using namespace std;
 
@@ -62,8 +64,67 @@ private:
     vector<Type> elements_;
 };
 
+template <typename Type>
+class StackMin 
+{
+public:
+
+    void Push(const Type& element) 
+    {
+        // напишите реализацию метода
+    }
+
+    void Pop() 
+    {
+        // напишите реализацию метода
+    }
+
+    const Type& Peek() const 
+    {
+        return elements_.Peek();
+    }
+
+    Type& Peek() 
+    {
+        return elements_.Peek();
+    }
+
+    void Print() const 
+    {
+        // работу этого метода мы проверять не будем,
+        // но если он вам нужен, то можете его реализовать
+        elements_.Print();
+    }
+
+    uint64_t Size() const 
+    {
+        return elements_.size();
+    }
+
+    bool IsEmpty() const 
+    {
+        return elements_.IsEmpty();
+    }
+
+    const Type& PeekMin() const 
+    {
+        // напишите реализацию метода
+    }
+
+    Type& PeekMin() 
+    {
+        // напишите реализацию метода
+    }
+
+private:
+
+    Stack<Type> elements_;
+    // возможно, здесь вам понадобится что-то изменить
+};
+
 int main() 
 {
+    /*
     Stack<int> stack;
     
     for (uint32_t i = 0; i < 10; ++i) 
@@ -75,5 +136,26 @@ int main()
     {
         stack.Pop();
         stack.Print();
+    }
+    */
+
+    StackMin<int> stack;
+    vector<int> values(5);
+    // заполняем вектор для тестирования нашего стека
+    iota(values.begin(), values.end(), 1);
+    // перемешиваем значения
+    random_shuffle(values.begin(), values.end());
+    // заполняем стек
+    for (int i = 0; i < 5; ++i) 
+    {
+        stack.Push(values[i]);
+    }
+    
+    // печатаем стек и его минимум, постепенно убирая из стека элементы
+    while (!stack.IsEmpty()) 
+    {
+        stack.Print();
+        cout << "Минимум = "s << stack.PeekMin() << endl;
+        stack.Pop();
     }
 }
