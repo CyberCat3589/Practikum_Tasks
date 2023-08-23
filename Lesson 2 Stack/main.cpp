@@ -141,12 +141,33 @@ public:
 
     void Push(const Type& element) 
     {
-    // напишите реализацию метода
+        if(elements_.IsEmpty())
+        {
+            elements_.Push(element);
+        }
+        else
+        {
+            while(!elements_.IsEmpty() && element > elements_.Peek())
+            {
+                Type elem_move = elements_.Peek();
+                temp_.Push(elem_move);
+                elements_.Pop();
+            }
+
+            elements_.Push(element);
+
+            while(!temp_.IsEmpty())
+            {
+                Type elem_move = temp_.Peek();
+                elements_.Push(elem_move);
+                temp_.Pop();
+            }
+        }
     }
 
     void Pop() 
     {
-    // напишите реализацию метода
+        elements_.Pop();
     }
 
     const Type& Peek() const 
@@ -177,6 +198,7 @@ public:
 private:
 
     Stack<Type> elements_;
+    Stack<Type> temp_;
 };
 
 int main() 
