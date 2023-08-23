@@ -71,12 +71,23 @@ public:
 
     void Push(const Type& element) 
     {
-        // напишите реализацию метода
+        if(elements_.IsEmpty() || (element < min_elements_.Peek()))
+        {
+            elements_.Push(element);
+            min_elements_.Push(element);
+        }
+        else
+        {
+            elements_.Push(element);
+            Type current_min = min_elements_.Peek();
+            min_elements_.Push(current_min);
+        }
     }
 
     void Pop() 
     {
-        // напишите реализацию метода
+        elements_.Pop();
+        min_elements_.Pop();
     }
 
     const Type& Peek() const 
@@ -108,18 +119,19 @@ public:
 
     const Type& PeekMin() const 
     {
-        // напишите реализацию метода
+        return min_elements_.Peek();
     }
 
     Type& PeekMin() 
     {
-        // напишите реализацию метода
+        return min_elements_.Peek();
     }
 
 private:
 
     Stack<Type> elements_;
     // возможно, здесь вам понадобится что-то изменить
+    Stack<Type> min_elements_;
 };
 
 int main() 
