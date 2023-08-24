@@ -64,30 +64,65 @@ template <typename Type>
 class Queue 
 {
 public:
+
     void Push(const Type& element) 
     {
-        // напишите реализацию
+        stack1_.Push(element);
     }
+
     void Pop() 
     {
-        // напишите реализацию
+        MoveFromFirstStack();
+
+        stack1_.Pop();
+
+        MoveFromSecondStack();
     }
-    Type& Front() 
+
+    Type Front() 
     {
-        // напишите реализацию
+        MoveFromFirstStack();
+
+        Type front = stack1_.Peek();
+
+        MoveFromSecondStack();
+
+        return front;
     }
+
     uint64_t Size() const 
     {
-        // напишите реализацию
+        return stack1_.Size();
     }
+
     bool IsEmpty() const 
     {
-        // напишите реализацию
+        return stack1_.IsEmpty();
     }
 
 private:
     Stack<Type> stack1_;
     Stack<Type> stack2_;
+
+    void MoveFromFirstStack()
+    {
+        while(stack1_.Size() > 1)
+        {
+            Type elem_move = stack1_.Peek();
+            stack2_.Push(elem_move);
+            stack1_.Pop();
+        }
+    }
+
+    void MoveFromSecondStack()
+    {
+        while (!stack2_.IsEmpty())
+        {
+            Type elem_move = stack2_.Peek();
+            stack1_.Push(elem_move);
+            stack2_.Pop();
+        }
+    }
 };
 
 int main() 
