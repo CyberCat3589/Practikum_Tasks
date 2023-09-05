@@ -3,6 +3,7 @@
 #include <vector>
 #include <chrono>
 #include <thread>
+#include <log_duration.h>
 
 using namespace std;
 
