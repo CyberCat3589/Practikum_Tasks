@@ -4,6 +4,8 @@
 #include <chrono>
 #include <string>
 
+#define LOG_DURATION(x) LogDuration profile_guard(x)
+
 class LogDuration
 {
     using Clock = std::chrono::steady_clock;

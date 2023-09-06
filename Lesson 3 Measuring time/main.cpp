@@ -47,7 +47,7 @@ void AppendRandom(vector<int>& v, int n)
 
 void Operate() 
 {
-    LogDuration time_log("Total"s);
+    LOG_DURATION("Total"s);
     vector<int> random_bits;
     vector<int> reversed_bits;
 
@@ -56,19 +56,20 @@ void Operate()
     static const int N = 1 << 17;
 
     {
-        LogDuration time_log("Append random"s);
+        LOG_DURATION("Append random"s);
+        //LogDuration time_log("Append random"s);
         // заполним вектор случайными числами 0 и 1
         AppendRandom(random_bits, N);
     }
 
     {
-        LogDuration time_log("Reverse"s);
+        LOG_DURATION("Reverse"s);
         // перевернём вектор задом наперёд
         reversed_bits = ReverseVector(random_bits);
     }
 
     {
-        LogDuration time_log("Counting"s);
+        LOG_DURATION("Counting"s);
         // посчитаем процент единиц на начальных отрезках вектора
         for (int i = 1, step = 1; i <= N; i += step, step *= 2) 
         {
