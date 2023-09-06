@@ -3,7 +3,7 @@
 #include <vector>
 #include <chrono>
 #include <thread>
-#include <log_duration.h>
+#include "log_duration.h"
 
 using namespace std;
 
@@ -47,48 +47,38 @@ void AppendRandom(vector<int>& v, int n)
 
 void Operate() 
 {
+    LogDuration time_log("Total"s);
     vector<int> random_bits;
+    vector<int> reversed_bits;
 
     // операция << для целых чисел это сдвиг всех бит в двоичной
     // записи числа. Запишем с её помощью число 2 в степени 17 (131072)
     static const int N = 1 << 17;
 
-    const auto start_append_time = chrono::steady_clock::now();
-
-    // заполним вектор случайными числами 0 и 1
-    AppendRandom(random_bits, N);
-
-    const auto end_append_time = chrono::steady_clock::now();
-    const auto append_dur = end_append_time - start_append_time;
-
-    cerr << "Append random: "s << chrono::duration_cast<chrono::milliseconds>(append_dur).count() << " ms"s << endl;
-
-    const auto start_reverse_time = chrono::steady_clock::now();
-
-    // перевернём вектор задом наперёд
-    vector<int> reversed_bits = ReverseVector(random_bits);
-
-    const auto end_reverse_time = chrono::steady_clock::now();
-    const auto reversre_dur = end_reverse_time - start_reverse_time;
-
-    cerr << "Reverse: "s << chrono::duration_cast<chrono::milliseconds>(reversre_dur).count() << " ms"s << endl;
-
-    const auto start_counting_time = chrono::steady_clock::now();
-
-    // посчитаем процент единиц на начальных отрезках вектора
-    for (int i = 1, step = 1; i <= N; i += step, step *= 2) 
     {
-        // чтобы вычислить проценты, мы умножаем на литерал 100. типа double;
-        // целочисленное значение функции CountPops при этом автоматически
-        // преобразуется к double, как и i
-        double rate = CountPops(reversed_bits, 0, i) * 100. / i;
-        cout << "After "s << i << " bits we found "s << rate << "% pops"s
-             << endl;
+        LogDuration time_log("Append random"s);
+        // заполним вектор случайными числами 0 и 1
+        AppendRandom(random_bits, N);
     }
 
-    const auto end_counting_time = chrono::steady_clock::now();
-    const auto counting_dur = end_counting_time - start_counting_time;
-    cerr << "Counting: "s << chrono::duration_cast<chrono::milliseconds>(counting_dur).count() << " ms"s << endl;
+    {
+        LogDuration time_log("Reverse"s);
+        // перевернём вектор задом наперёд
+        reversed_bits = ReverseVector(random_bits);
+    }
+
+    {
+        LogDuration time_log("Counting"s);
+        // посчитаем процент единиц на начальных отрезках вектора
+        for (int i = 1, step = 1; i <= N; i += step, step *= 2) 
+        {
+            // чтобы вычислить проценты, мы умножаем на литерал 100. типа double;
+            // целочисленное значение функции CountPops при этом автоматически
+            // преобразуется к double, как и i
+            double rate = CountPops(reversed_bits, 0, i) * 100. / i;
+            cout << "After "s << i << " bits we found "s << rate << "% pops"s << endl;
+        }
+    }
 }
 
 int main() 
