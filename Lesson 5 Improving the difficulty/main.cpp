@@ -3,32 +3,51 @@
 #include <vector>
 #include <random>
 
+#include "../Lesson 3 Measuring time/log_duration.h"
+
 using namespace std;
 
-// функция возвращает true, если векторы из одинаковых элементов
-// перепишите эту функцию, улучшив её асимптотическую сложность
-bool TestPermut(const vector<int>& v1, const vector<int>& v2) 
+// bool TestPermut(const vector<int>& v1, const vector<int>& v2)
+// {
+//     LOG_DURATION("Original");
+//     // если они разной длины, элементы заведомо разные
+//     if (v1.size() != v2.size())
+//     {
+//         return false;
+//     }
+
+//     for (int i : v1)
+//     {
+//         // проверяем, что каждый элемент первого вектора
+//         // содержится одинаковое количество раз в обоих векторах
+//         if (count(v1.begin(), v1.end(), i) != count(v2.begin(), v2.end(), i))
+//         {
+//             return false;
+//         }
+//     }
+
+//     return true;
+// }
+
+bool TestPermut(const vector<int>& v1, const vector<int>& v2)
 {
+    LOG_DURATION("Modified");
+    vector<int> v1_copy = v1;
+    vector<int> v2_copy = v2;
+
     // если они разной длины, элементы заведомо разные
-    if (v1.size() != v2.size()) 
+    if (v1.size() != v2.size())
     {
         return false;
     }
 
-    for (int i : v1) 
-    {
-        // проверяем, что каждый элемент первого вектора
-        // содержится одинаковое количество раз в обоих векторах
-        if (count(v1.begin(), v1.end(), i) != count(v2.begin(), v2.end(), i)) 
-        {
-            return false;
-        }
-    }
+    sort(v1_copy.begin(), v1_copy.end());
+    sort(v2_copy.begin(), v2_copy.end());
 
-    return true;
+    return v1_copy == v2_copy;
 }
 
-int main() 
+int main()
 {
     std::mt19937 g;
 
@@ -38,7 +57,7 @@ int main()
     v1.reserve(n);
     v2.reserve(n);
 
-    for (int i = 0; i < n; ++i) 
+    for (int i = 0; i < n; ++i)
     {
         v1.push_back(rand());
         v2.push_back(rand());
