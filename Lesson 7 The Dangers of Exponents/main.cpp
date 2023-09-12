@@ -1,5 +1,6 @@
 #include <cstdint>
 #include <iostream>
+#include "../Lesson 3 Measuring time/log_duration.h"
 
 using namespace std;
 
@@ -7,16 +8,21 @@ using namespace std;
 // реализовав линейный алгоритм
 int64_t T(int i) 
 {
-    if (i <= 1) 
+    if (i <= 1) return 0;
+    if (i == 2) return 1;
+    
+    int prev0 = 0, prev1 = 0, prev2 = 1;
+    int next;
+
+    for(int t = 1; t < i - 1; ++t)
     {
-        return 0;
-    }
-    if (i == 2) 
-    {
-        return 1;
+        next = prev0 + prev1 + prev2;
+        prev0 = prev1;
+        prev1 = prev2;
+        prev2 = next;
     }
 
-    return T(i - 1) + T(i - 2) + T(i - 3);
+    return prev2;
 }
 
 int main() 
@@ -30,6 +36,9 @@ int main()
             break;
         }
 
-        cout << "Ti = "s << T(i) << endl;
+        {
+            LOG_DURATION("Time");
+            cout << "Ti = "s << T(i) << endl;
+        }
     }
 }
