@@ -5,22 +5,29 @@ using namespace std;
 template <typename F>
 int FindFloor(int n, F drop) 
 {
-    // Переделайте этот алгоритм, имеющий линейную сложность.
-    // В итоге должен получится логарифмический алгоритм.
-    for (int i = 1; i < n; ++i) 
+    int a = 1;
+    int b = n;
+    int mid = 0;
+
+    while (a != b)
     {
-        if (drop(i)) 
+        mid = (a + b) / 2;
+        if(drop(mid))
         {
-            return i;
+            b = mid;
+        }
+        else
+        {
+            a = mid + 1;
         }
     }
-
-    return n;
+    
+    return a;
 }
 
 int main() 
 {
-    int n,t;
+    int n,t; // кол-во этажей и этаж, при котором drop == true
     cout << "Enter n and target floor number: "s << endl;
     cin >> n >> t;
 
