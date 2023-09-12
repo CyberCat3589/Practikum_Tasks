@@ -11,8 +11,8 @@ int64_t T(int i)
     if (i <= 1) return 0;
     if (i == 2) return 1;
     
-    int prev0 = 0, prev1 = 0, prev2 = 1;
-    int next;
+    int64_t prev0 = 0, prev1 = 0, prev2 = 1;
+    int64_t next;
 
     for(int t = 1; t < i - 1; ++t)
     {
