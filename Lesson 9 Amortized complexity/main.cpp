@@ -17,25 +17,33 @@ public:
     // добавить билет в систему
     void PushTicket(const string& name) 
     {
-        // реализуйте метод
+        tickets_.push_back({++last_id_, name});
     }
 
     // получить количество доступных билетов
     int GetAvailable() const 
     {
-        // реализуйте метод
+        return static_cast<int>(tickets_.size());
     }
 
     // получить количество доступных билетов определённого типа
     int GetAvailable(const string& name) const 
     {
         // реализуйте метод
+        int result = count_if(tickets_.begin(), tickets_.end(), 
+            [&name](Ticket ticket)
+            { 
+                return ticket.name == name; 
+            });
+
+        return result;
     }
 
     // отозвать старые билеты (до определённого id)
     void Invalidate(int minimum) 
     {
         // реализуйте метод
+        
     }
 
 private:
