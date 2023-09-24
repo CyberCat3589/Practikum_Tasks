@@ -42,8 +42,13 @@ public:
     // отозвать старые билеты (до определённого id)
     void Invalidate(int minimum) 
     {
-        // реализуйте метод
-        
+        if(minimum < last_id_ && !tickets_.empty())
+        {
+            for(int i = tickets_.at(0).id; i < last_id_; ++i)
+            {
+                tickets_.pop_front();
+            }
+        }
     }
 
 private:
