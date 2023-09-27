@@ -17,7 +17,8 @@ public:
     // добавить билет в систему
     void PushTicket(const string& name) 
     {
-        tickets_.push_back({++last_id_, name});
+        if(tickets_.empty()) tickets_.push_back({0, name});
+        else tickets_.push_back({++last_id_, name});
     }
 
     // получить количество доступных билетов
@@ -42,13 +43,13 @@ public:
     // отозвать старые билеты (до определённого id)
     void Invalidate(int minimum) 
     {
-        if(minimum < last_id_ && !tickets_.empty())
+        //if(minimum < last_id_ && !tickets_.empty())
+        
+        for(int i = tickets_.front().id; i < minimum; ++i)
         {
-            for(int i = tickets_.at(0).id; i < last_id_; ++i)
-            {
-                tickets_.pop_front();
-            }
+            tickets_.pop_front();
         }
+        
     }
 
 private:
