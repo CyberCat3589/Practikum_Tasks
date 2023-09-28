@@ -9,23 +9,20 @@ using namespace std;
 
 int EffectiveCount(const vector<int>& v, int n, int i) 
 {
-    // место для вашего решения
-    bool good_case = false; // false - заглушка, расчитать
-    int result_num = 0;
-    if(good_case)
-    {
-        cout << "Using find_if" << endl;
-        auto it = find_if(v.begin(), v.end(), [i](int num){ return num <= i; });
-        result_num = it - v.begin();
-    }
-    else
+    int64_t k = static_cast<int64_t>(v.size())*(i + 1)/(n + 1);
+    if (k > log2(v.size())) 
     {
         cout << "Using upper_bound" << endl;
-        auto it = upper_bound(v.begin(), v.end(), i);
-        result_num = it - v.begin();
+        auto iter = upper_bound(v.begin(), v.end(), i);
+        return iter - v.begin();
+        } 
+    else 
+    {
+        cout << "Using find_if" << endl;
+        auto iter = find_if(v.begin(), v.end(), [i](int x) {
+            return x > i;});
+        return iter - v.begin();
     }
-
-    return result_num;
 }
 
 int main() 
