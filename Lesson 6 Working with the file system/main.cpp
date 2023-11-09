@@ -15,7 +15,7 @@ path operator""_p(const char* data, std::size_t sz)
     return path(data, data + sz);
 }
 
-void PrintTreeRec(const path& p, vector<path>& paths)
+void DirectoryTraversal(const path& p, vector<path>& paths)
 {
     for(const auto& dir_entry : filesystem::directory_iterator(p))
     {
@@ -23,25 +23,28 @@ void PrintTreeRec(const path& p, vector<path>& paths)
         paths.push_back(dir_entry);
         if(path_status.type() == filesystem::file_type::directory)
         {
-            PrintTreeRec(dir_entry, paths);   
+            DirectoryTraversal(dir_entry, paths);   
         }
     }
-
-    // sort(names.begin(), names.end(),[](pair<string, filesystem::file_status> a,                                                                        pair<string, filesystem::file_status> b) {
-    //             if(a.second.type() == b.second.type() && a.second.permissions() == b.second.permissions()) {
-    //                 return a.first < b.first;
-    //             }
-    //             return a.second.type() < b.second.type();
-    //         });
 }
 
 // напишите эту функцию
 void PrintTree(ostream& dst, const path& p)
 {
     vector<path> paths;
-    PrintTreeRec(p, paths);
+    DirectoryTraversal(p, paths);
 
-    sort(paths.rbegin(), paths.rend());
+    //sort(paths.rbegin(), paths.rend());
+
+    sort(paths.begin(), paths.end(), 
+    [](pair<string, filesystem::file_status> a, pair<string, filesystem::file_status> b) 
+    {
+        if(a.second.type() == b.second.type() && a.second.permissions() == b.second.permissions()) 
+        {
+            return a.first < b.first;
+        }
+        return a.second.type() < b.second.type();
+    });
 
     for(path p : paths)
     {
