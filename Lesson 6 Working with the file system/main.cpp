@@ -49,6 +49,11 @@ void PrintTree(ostream& dst, const path& p, int32_t level)
     }
 }
 
+void PrintTree(ostream& dst, const path& p)
+{
+    PrintTree(dst, p, 0);
+}
+
 int main() 
 {
     error_code err;
