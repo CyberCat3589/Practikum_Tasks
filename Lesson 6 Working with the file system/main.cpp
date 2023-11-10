@@ -65,14 +65,14 @@ int main()
     ofstream("test_dir"_p / "b"_p / "f2.txt"_p);
     ofstream("test_dir"_p / "a"_p / "f3.txt"_p);
 
-    //ostringstream out;
-    PrintTree(cout, "test_dir"_p);
-    // assert(out.str() ==
-    //     "test_dir\n"
-    //     "  b\n"
-    //     "    f2.txt\n"
-    //     "    f1.txt\n"
-    //     "  a\n"
-    //     "    f3.txt\n"s
-    // );
+    ostringstream out;
+    PrintTree(out, "test_dir"_p);
+    assert(out.str() ==
+        "test_dir\n"
+        "  b\n"
+        "    f2.txt\n"
+        "    f1.txt\n"
+        "  a\n"
+        "    f3.txt\n"s
+    );
 }
