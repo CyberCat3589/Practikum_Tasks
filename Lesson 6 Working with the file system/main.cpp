@@ -15,40 +15,37 @@ path operator""_p(const char* data, std::size_t sz)
     return path(data, data + sz);
 }
 
-void DirectoryTraversal(const path& p, vector<path>& paths)
-{
-    for(const auto& dir_entry : filesystem::directory_iterator(p))
-    {
-        filesystem::file_status path_status = filesystem::status(dir_entry);
-        paths.push_back(dir_entry);
-        if(path_status.type() == filesystem::file_type::directory)
-        {
-            DirectoryTraversal(dir_entry, paths);   
-        }
-    }
-}
-
 // напишите эту функцию
-void PrintTree(ostream& dst, const path& p)
+void PrintTree(ostream& dst, const path& p, int32_t level)
 {
+    string lead(level*2, ' ');
+    dst << lead << p.filename().string() << "\n";
     vector<path> paths;
-    DirectoryTraversal(p, paths);
-
-    //sort(paths.rbegin(), paths.rend());
+    
+    for(const path& entry : filesystem::directory_iterator(p))
+    {
+        paths.push_back(entry);
+    }
 
     sort(paths.begin(), paths.end(), 
-    [](pair<string, filesystem::file_status> a, pair<string, filesystem::file_status> b) 
+    [](path p1, path p2)
     {
-        if(a.second.type() == b.second.type() && a.second.permissions() == b.second.permissions()) 
-        {
-            return a.first < b.first;
-        }
-        return a.second.type() < b.second.type();
+        return filesystem::status(p1).type() > filesystem::status(p2).type() || 
+        (filesystem::status(p1).type() == filesystem::status(p2).type() && (p1.filename().string() > p2.filename().string()));
     });
 
-    for(path p : paths)
+    string lead_((level +1)*2, ' ');
+
+    for(const path& item : paths)
     {
-        dst << p.filename().string() << endl;
+        if(filesystem::status(item).type() == filesystem::file_type::directory)
+        {
+            PrintTree(dst, item, level + 1);
+        }
+        else
+        {
+            dst << lead_ << item.filename().string() << "\n";
+        }
     }
 }
 
