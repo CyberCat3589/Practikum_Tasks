@@ -1,4 +1,5 @@
 #include <cassert>
+#include <stdexcept>
 
 // Умный указатель, удаляющий связанный объект при своём разрушении.
 // Параметр шаблона T задаёт тип объекта, на который ссылается указатель
@@ -42,6 +43,29 @@ class ScopedPtr
         T* previous = ptr_;
         ptr_ = nullptr;
         return previous;
+    }
+
+    // Оператор приведения к типу bool позволяет узнать, ссылается ли умный указатель
+    // на какой-либо объект
+    explicit operator bool() const noexcept
+    {
+        return ptr_ != nullptr;
+    }
+
+    // Оператор разыменования возвращает ссылку на объект
+    // Выбрасывает исключение std::logic_error, если указатель нулевой
+    T& operator*() const
+    {
+        if(ptr_ == nullptr) throw std::logic_error("");
+        return *ptr_;
+    }
+
+    // Оператор -> должен возвращать указатель на объект
+    // Выбрасывает исключение std::logic_error, если указатель нулевой
+    T* operator->() const
+    {
+        if(ptr_ == nullptr) throw std::logic_error("");
+        return ptr_;
     }
 
   private:
