@@ -1,135 +1,88 @@
-#include <algorithm>
+#include "octopus.h"
+
 #include <cassert>
-#include <vector>
+#include <iostream>
 
 using namespace std;
 
-template <typename T> 
-class PtrVector
-{
-  public:
-    PtrVector() = default;
-
-    // Создаёт вектор указателей на копии объектов из other
-    PtrVector(const PtrVector& other)
-    {
-        items_.clear();
-        items_.reserve(other.GetItems().size());
-
-        for(const auto& item_ptr : other.GetItems())
-        {
-            T* ptr;
-            if(item_ptr == nullptr) ptr = nullptr;
-            else ptr = new T(*item_ptr);
-
-            items_.push_back(ptr);
-        }
-    }
-
-    // Деструктор удаляет объекты в куче, на которые ссылаются указатели,
-    // в векторе items_
-    ~PtrVector()
-    {
-        for(auto item : items_)
-        {
-            delete item;
-            item = nullptr;
-        }
-        items_.clear();
-    }
-
-    // Возвращает ссылку на вектор указателей
-    vector<T*>& GetItems() noexcept
-    {
-        vector<T*>& ref_items = items_;
-        return ref_items;
-    }
-
-    // Возвращает константную ссылку на вектор указателей
-    vector<T*> const& GetItems() const noexcept
-    {
-        const vector<T*>& ref_items = items_;
-        return ref_items;
-    }
-
-  private:
-    vector<T*> items_;
-};
-
-// Эта функция main тестирует шаблон класса PtrVector
 int main()
 {
-    
-    // Вспомогательный "шпион", позволяющий узнать о своём удалении
-    struct DeletionSpy
+    // Проверка конструирования осьминогов
     {
-        explicit DeletionSpy(bool& is_deleted) : is_deleted_(is_deleted)
-        {
-        }
-        ~DeletionSpy()
-        {
-            is_deleted_ = true;
-        }
-        bool& is_deleted_;
-    };
+        // По умолчанию осьминог имеет 8 щупалец
+        Octopus default_octopus;
+        assert(default_octopus.GetTentacleCount() == 8);
 
-    // Проверяем удаление элементов
-    {
-        bool spy1_is_deleted = false;
-        DeletionSpy* ptr1 = new DeletionSpy(spy1_is_deleted);
-        {
-            PtrVector<DeletionSpy> ptr_vector;
-            ptr_vector.GetItems().push_back(ptr1);
-            assert(!spy1_is_deleted);
+        // Осьминог может иметь отличное от 8 количество щупалец
+        Octopus quadropus(4);
+        assert(quadropus.GetTentacleCount() == 4);
 
-            // Константная ссылка на ptr_vector
-            const auto& const_ptr_vector_ref(ptr_vector);
-            // И константная, и неконстантная версия GetItems
-            // должны вернуть ссылку на один и тот же вектор
-            assert(&const_ptr_vector_ref.GetItems() == &ptr_vector.GetItems());
-        }
-        // При разрушении ptr_vector должен удалить все объекты, на которые
-        // ссылаются находящиеся внутри него указателели
-        assert(spy1_is_deleted);
+        // И даже вообще не иметь щупалец
+        Octopus coloboque(0);
+        assert(coloboque.GetTentacleCount() == 0);
     }
 
-    // Вспомогательный «шпион», позволяющий узнать о своём копировании
-    struct CopyingSpy
+    // Осьминогу можно добавлять щупальца
     {
-        explicit CopyingSpy(int& copy_count) : copy_count_(copy_count)
+        Octopus octopus(1);
+        Tentacle* t0 = &octopus.GetTentacle(0);
+        Tentacle* t1 = &octopus.AddTentacle();
+        assert(octopus.GetTentacleCount() == 2);
+        Tentacle* t2 = &octopus.AddTentacle();
+        assert(octopus.GetTentacleCount() == 3);
+
+        // После добавления щупалец ранее созданные щупальца не меняют своих адресов
+        assert(&octopus.GetTentacle(0) == t0);
+        assert(&octopus.GetTentacle(1) == t1);
+        assert(&octopus.GetTentacle(2) == t2);
+
+        for (int i = 0; i < octopus.GetTentacleCount(); ++i)
         {
+            assert(octopus.GetTentacle(i).GetId() == i + 1);
         }
-        CopyingSpy(const CopyingSpy& rhs) : copy_count_(rhs.copy_count_)  //
-        {
-            ++copy_count_;
-        }
-        int& copy_count_;
-    };
-
-    // Проверяем копирование элементов при копировании массива указателей
-    {
-        // 10 элементов
-        vector<int> copy_counters(10);
-
-        PtrVector<CopyingSpy> ptr_vector;
-        // Подготавливаем оригинальный массив указателей
-        for (auto& counter : copy_counters)
-        {
-            ptr_vector.GetItems().push_back(new CopyingSpy(counter));
-        }
-        // Последний элемент содержит нулевой указатель
-        ptr_vector.GetItems().push_back(nullptr);
-
-        auto ptr_vector_copy(ptr_vector);
-        // Количество элементов в копии равно количеству элементов оригинального вектора
-        assert(ptr_vector_copy.GetItems().size() == ptr_vector.GetItems().size());
-
-        // копия должна хранить указатели на новые объекты
-        assert(ptr_vector_copy.GetItems() != ptr_vector.GetItems());
-        // Последний элемент исходного массива и его копии - нулевой указатель
-        assert(ptr_vector_copy.GetItems().back() == nullptr);
-        // Проверяем, что элементы были скопированы (копирующие шпионы увеличивают счётчики копий).
-        assert(all_of(copy_counters.begin(), copy_counters.end(), [](int counter) { return counter == 1; }));
     }
-    
+
+    // Осьминоги могут прицепляться к щупальцам друг друга
+    {
+        Octopus male(2);
+        Octopus female(2);
+
+        assert(male.GetTentacle(0).GetLinkedTentacle() == nullptr);
+
+        male.GetTentacle(0).LinkTo(female.GetTentacle(1));
+        assert(male.GetTentacle(0).GetLinkedTentacle() == &female.GetTentacle(1));
+
+        male.GetTentacle(0).Unlink();
+        assert(male.GetTentacle(0).GetLinkedTentacle() == nullptr);
+    }
+
+    // Копия осьминога имеет свою собственную копию щупалец, которые
+    // копируют состояние щупалец оригинального осьминога
+    {
+        // Перебираем осьминогов с разным количеством щупалец
+        for (int num_tentacles = 0; num_tentacles < 10; ++num_tentacles)
+        {
+            Octopus male(num_tentacles);
+            Octopus female(num_tentacles);
+            // Пусть они хватают друг друга за щупальца
+            for (int i = 0; i < num_tentacles; ++i)
+            {
+                male.GetTentacle(i).LinkTo(female.GetTentacle(num_tentacles - 1 - i));
+            }
+
+            Octopus male_copy(male);
+            // Проверяем состояние щупалец копии
+            assert(male_copy.GetTentacleCount() == male.GetTentacleCount());
+            for (int i = 0; i < male_copy.GetTentacleCount(); ++i)
+            {
+                // Каждое щупальце копии размещается по адресу, отличному от адреса оригинального щупальца
+                assert(&male_copy.GetTentacle(i) != &male.GetTentacle(i));
+                // Каждое щупальце копии прицепляется к тому же щупальцу, что и оригинальное
+                assert(male_copy.GetTentacle(i).GetLinkedTentacle() == male.GetTentacle(i).GetLinkedTentacle());
+            }
+        }
+        // Если вы видите эту надпись, то разрушение осьминогов, скорее всего,
+        // прошло без неопределённого поведения
+        cout << "Everything is OK"s << endl;
+    }
 }
