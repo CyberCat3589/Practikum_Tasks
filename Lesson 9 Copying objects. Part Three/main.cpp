@@ -13,26 +13,43 @@ class PtrVector
     // Создаёт вектор указателей на копии объектов из other
     PtrVector(const PtrVector& other)
     {
-        // Реализуйте копирующий конструктор самостоятельно
+        items_.clear();
+        items_.reserve(other.GetItems().size());
+
+        for(const auto& item_ptr : other.GetItems())
+        {
+            T* ptr;
+            if(item_ptr == nullptr) ptr = nullptr;
+            else ptr = new T(*item_ptr);
+
+            items_.push_back(ptr);
+        }
     }
 
     // Деструктор удаляет объекты в куче, на которые ссылаются указатели,
     // в векторе items_
     ~PtrVector()
     {
-        // Реализуйте тело деструктора самостоятельно
+        for(auto item : items_)
+        {
+            delete item;
+            item = nullptr;
+        }
+        items_.clear();
     }
 
     // Возвращает ссылку на вектор указателей
     vector<T*>& GetItems() noexcept
     {
-        // Реализуйте метод самостоятельно
+        vector<T*>& ref_items = items_;
+        return ref_items;
     }
 
     // Возвращает константную ссылку на вектор указателей
     vector<T*> const& GetItems() const noexcept
     {
-        // Реализуйте метод самостоятельно
+        const vector<T*>& ref_items = items_;
+        return ref_items;
     }
 
   private:
@@ -42,6 +59,7 @@ class PtrVector
 // Эта функция main тестирует шаблон класса PtrVector
 int main()
 {
+    
     // Вспомогательный "шпион", позволяющий узнать о своём удалении
     struct DeletionSpy
     {
@@ -113,4 +131,5 @@ int main()
         // Проверяем, что элементы были скопированы (копирующие шпионы увеличивают счётчики копий).
         assert(all_of(copy_counters.begin(), copy_counters.end(), [](int counter) { return counter == 1; }));
     }
+    
 }
