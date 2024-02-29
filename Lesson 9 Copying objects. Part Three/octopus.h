@@ -2,6 +2,8 @@
 
 // Тут можно подключить scopedptr.h и ptrvector.h,
 // если они вам понадобятся.
+#include "ptrvector.h"
+#include <cstddef>
 
 #include <new>  // Для исключения bad_alloc
 #include <vector>
@@ -53,7 +55,7 @@ class Octopus
             for (int i = 1; i <= num_tentacles; ++i)
             {
                 t = new Tentacle(i);      // Может выбросить исключение bad_alloc
-                tentacles_.push_back(t);  // Может выбросить исключение bad_alloc
+                tentacles_.GetItems().push_back(t);  // Может выбросить исключение bad_alloc
 
                 // Обнуляем указатель на щупальце, которое уже добавили в tentacles_,
                 // чтобы не удалить его в обработчике catch повторно
@@ -62,8 +64,6 @@ class Octopus
         }
         catch (const std::bad_alloc&)
         {
-            // Удаляем щупальца, которые успели попасть в контейнер tentacles_
-            Cleanup();
             // Удаляем щупальце, которое создали, но не добавили в tentacles_
             delete t;
             // Конструктор не смог создать осьминога с восемью щупальцами,
@@ -73,49 +73,33 @@ class Octopus
         }
     }
 
-    ~Octopus()
-    {
-        // Осьминог владеет объектами в динамической памяти (щупальца),
-        // которые должны быть удалены при его разрушении.
-        // Деструктор - лучшее место, чтобы прибраться за собой.
-        Cleanup();
-    }
-
     // Добавляет новое щупальце с идентификатором,
     // равным (количество_щупалец + 1):
     // 1, 2, 3, ...
     // Возвращает ссылку на добавленное щупальце
     Tentacle& AddTentacle()
     {
-        // Реализуйте добавление щупальца самостоятельно
+        Tentacle* new_tentacle = new Tentacle(tentacles_.GetItems().size() + 1);
+        tentacles_.GetItems().push_back(new_tentacle);
+        return *new_tentacle;
     }
 
     int GetTentacleCount() const noexcept
     {
-        return static_cast<int>(tentacles_.size());
+        return static_cast<int>(tentacles_.GetItems().size());
     }
 
     const Tentacle& GetTentacle(size_t index) const
     {
-        return *tentacles_.at(index);
+        return *tentacles_.GetItems().at(index);
     }
     Tentacle& GetTentacle(size_t index)
     {
-        return *tentacles_.at(index);
+        return *tentacles_.GetItems().at(index);
     }
 
   private:
-    void Cleanup()
-    {
-        // Удаляем щупальца осьминога из динамической памяти
-        for (Tentacle* t : tentacles_)
-        {
-            delete t;
-        }
-        // Очищаем массив указателей на щупальца
-        tentacles_.clear();
-    }
-
+    
     // Вектор хранит указатели на щупальца. Сами объекты щупалец находятся в куче
-    std::vector<Tentacle*> tentacles_;
+    PtrVector<Tentacle> tentacles_;
 };
