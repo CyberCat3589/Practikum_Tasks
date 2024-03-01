@@ -80,117 +80,150 @@ class PtrVector
     vector<T*> items_;
 };
 
-// Эта функция main тестирует шаблон класса PtrVector
-int main()
+// Щупальце
+class Tentacle
 {
-    struct CopyingSpy
+  public:
+    explicit Tentacle(int id) noexcept : id_(id)
     {
-        CopyingSpy(int& copy_count, int& deletion_count) : copy_count_(copy_count), deletion_count_(deletion_count)
-        {
-        }
-        CopyingSpy(const CopyingSpy& rhs)
-            : copy_count_(rhs.copy_count_)  // счётчик копирований
-              ,
-              deletion_count_(rhs.deletion_count_)  // счётчик удалений
-        {
-            if (rhs.throw_on_copy_)
-            {
-                throw runtime_error("copy construction failed"s);
-            }
-            ++copy_count_;
-        }
-        ~CopyingSpy()
-        {
-            ++deletion_count_;
-        }
-        void ThrowOnCopy()
-        {
-            throw_on_copy_ = true;
-        }
-
-      private:
-        int& copy_count_;
-        int& deletion_count_;
-        bool throw_on_copy_ = false;
-    };
-
-    // Проверка присваивания
-    {
-        int item0_copy_count = 0;
-        int item0_deletion_count = 0;
-        {
-            PtrVector<CopyingSpy> v;
-
-            v.GetItems().push_back(new CopyingSpy(item0_copy_count, item0_deletion_count));
-            v.GetItems().push_back(nullptr);
-            {
-                PtrVector<CopyingSpy> v_copy;
-                v_copy = v;
-                assert(v_copy.GetItems().size() == v.GetItems().size());
-                assert(v_copy.GetItems().at(0) != v.GetItems().at(0));
-                assert(v_copy.GetItems().at(1) == nullptr);
-                assert(item0_copy_count == 1);
-                assert(item0_deletion_count == 0);
-            }
-            assert(item0_deletion_count == 1);
-        }
-        assert(item0_deletion_count == 2);
     }
 
-    // Проверка корректности самоприсваивания
+    int GetId() const noexcept
     {
-        int item0_copy_count = 0;
-        int item0_deletion_count = 0;
-
-        PtrVector<CopyingSpy> v;
-        v.GetItems().push_back(new CopyingSpy(item0_copy_count, item0_deletion_count));
-        CopyingSpy* first_item = v.GetItems().front();
-
-        v = v;
-        assert(v.GetItems().size() == 1);
-        // При самоприсваивании объекты должны быть расположены по тем же адресам
-        assert(v.GetItems().front() == first_item);
-        assert(item0_copy_count == 0);
-        assert(item0_deletion_count == 0);
+        return id_;
     }
 
-    // Проверка обеспечения строгой гарантии безопасности исключений при присваивании
+    Tentacle* GetLinkedTentacle() const noexcept
     {
-        int item0_copy_count = 0;
-        int item0_deletion_count = 0;
+        return linked_tentacle_;
+    }
+    void LinkTo(Tentacle& tentacle) noexcept
+    {
+        linked_tentacle_ = &tentacle;
+    }
+    void Unlink() noexcept
+    {
+        linked_tentacle_ = nullptr;
+    }
 
-        int item1_copy_count = 0;
-        int item1_deletion_count = 0;
+  private:
+    int id_ = 0;
+    Tentacle* linked_tentacle_ = nullptr;
+};
 
-        // v хранит 2 элемента
-        PtrVector<CopyingSpy> v;
-        v.GetItems().push_back(new CopyingSpy(item0_copy_count, item0_deletion_count));
-        v.GetItems().push_back(new CopyingSpy(item1_copy_count, item1_deletion_count));
+// Осьминог
+class Octopus
+{
+  public:
+    Octopus() : Octopus(8)
+    {
+    }
 
-        int other_item0_copy_count = 0;
-        int other_item0_deletion_count = 0;
-        // other_vector хранит 1 элемент, при копировании которого будет выброшено исключение
-        PtrVector<CopyingSpy> other_vector;
-        other_vector.GetItems().push_back(new CopyingSpy(other_item0_copy_count, other_item0_deletion_count));
-        other_vector.GetItems().front()->ThrowOnCopy();
-
-        // Сохраняем массив указателей
-        auto v_items(v.GetItems());
-
+    explicit Octopus(int num_tentacles)
+    {
+        Tentacle* t = nullptr;
         try
         {
-            v = other_vector;
-            // Операция должна выбросить исключение
-            assert(false);
+            for (int i = 1; i <= num_tentacles; ++i)
+            {
+                t = new Tentacle(i);      // Может выбросить исключение bad_alloc
+                tentacles_.GetItems().push_back(t);  // Может выбросить исключение bad_alloc
+
+                // Обнуляем указатель на щупальце, которое уже добавили в tentacles_,
+                // чтобы не удалить его в обработчике catch повторно
+                t = nullptr;
+            }
         }
-        catch (const runtime_error&)
+        catch (const std::bad_alloc&)
         {
+            // Удаляем щупальце, которое создали, но не добавили в tentacles_
+            delete t;
+            // Конструктор не смог создать осьминога с восемью щупальцами,
+            // поэтому выбрасываем исключение, чтобы сообщить вызывающему коду об ошибке
+            // throw без параметров внутри catch выполняет ПЕРЕВЫБРОС пойманного исключения
+            throw;
+        }
+    }
+
+    // Добавляет новое щупальце с идентификатором,
+    // равным (количество_щупалец + 1):
+    // 1, 2, 3, ...
+    // Возвращает ссылку на добавленное щупальце
+    Tentacle& AddTentacle()
+    {
+        Tentacle* new_tentacle = new Tentacle(tentacles_.GetItems().size() + 1);
+        tentacles_.GetItems().push_back(new_tentacle);
+        return *new_tentacle;
+    }
+
+    int GetTentacleCount() const noexcept
+    {
+        return static_cast<int>(tentacles_.GetItems().size());
+    }
+
+    const Tentacle& GetTentacle(size_t index) const
+    {
+        return *tentacles_.GetItems().at(index);
+    }
+    Tentacle& GetTentacle(size_t index)
+    {
+        return *tentacles_.GetItems().at(index);
+    }
+
+  private:
+    
+    // Вектор хранит указатели на щупальца. Сами объекты щупалец находятся в куче
+    PtrVector<Tentacle> tentacles_;
+};
+
+int main() 
+{
+    // Проверка присваивания осьминогов
+    {
+        Octopus octopus1(3);
+
+        // Настраиваем состояние исходного осьминога
+        octopus1.GetTentacle(2).LinkTo(octopus1.GetTentacle(1));
+
+        // До присваивания octopus2 имеет своё собственное состояние
+        Octopus octopus2(10);
+
+        octopus2 = octopus1;
+
+        // После присваивания осьминогов щупальца копии имеют то же состояние,
+        // что и щупальца присваиваемого объекта
+        assert(octopus2.GetTentacleCount() == octopus1.GetTentacleCount());
+        for (int i = 0; i < octopus2.GetTentacleCount(); ++i) {
+            auto& tentacle1 = octopus1.GetTentacle(i);
+            auto& tentacle2 = octopus2.GetTentacle(i);
+            assert(&tentacle2 != &tentacle1);
+            assert(tentacle2.GetId() == tentacle1.GetId());
+            assert(tentacle2.GetLinkedTentacle() == tentacle1.GetLinkedTentacle());
+        }
+    }
+
+    // Проверка самоприсваивания осьминогов
+    {
+        Octopus octopus(3);
+
+        // Настраиваем состояние осьминога
+        octopus.GetTentacle(0).LinkTo(octopus.GetTentacle(1));
+
+        vector<pair<Tentacle*, Tentacle*>> tentacles;
+        // Сохраняем информацию о щупальцах осьминога и его копии
+        for (int i = 0; i < octopus.GetTentacleCount(); ++i) {
+            tentacles.push_back({&octopus.GetTentacle(i), octopus.GetTentacle(i).GetLinkedTentacle()});
         }
 
-        // Элементы массива должны остаться прежними
-        assert(v.GetItems() == v_items);
-        assert(item0_copy_count == 0);
-        assert(item1_copy_count == 0);
-        assert(other_item0_copy_count == 0);
+        // Выполняем самоприсваивание
+        octopus = octopus;
+
+        // После самоприсваивания состояние осьминога не должно измениться
+        assert(octopus.GetTentacleCount() == static_cast<int>(tentacles.size()));
+        for (int i = 0; i < octopus.GetTentacleCount(); ++i) {
+            auto& tentacle_with_link = tentacles.at(i);
+            assert(&octopus.GetTentacle(i) == tentacle_with_link.first);
+            assert(octopus.GetTentacle(i).GetLinkedTentacle() == tentacle_with_link.second);
+        }
     }
 }
