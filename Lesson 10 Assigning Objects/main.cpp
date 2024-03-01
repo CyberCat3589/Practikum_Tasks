@@ -57,6 +57,17 @@ class PtrVector
         return items_;
     }
 
+    PtrVector& operator=(const PtrVector& rhs)
+    {
+        if(this != &rhs)
+        {
+            PtrVector rhs_copy = rhs;
+            this->GetItems().swap(rhs_copy.GetItems());
+        }
+        
+        return *this;
+    }
+
   private:
     void DeleteItems() noexcept
     {
