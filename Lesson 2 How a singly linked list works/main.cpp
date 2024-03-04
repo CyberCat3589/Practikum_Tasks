@@ -3,40 +3,37 @@
 #include <string>
 #include <utility>
 
-template <typename Type> class SingleLinkedList
+template <typename Type> 
+class SingleLinkedList
 {
     // Узел списка
     struct Node
     {
         Node() = default;
-        Node(const Type& val, Node* next) : value(val), next_node(next)
-        {
-        }
+        Node(const Type& val, Node* next) : value(val), next_node(next){}
         Type value;
         Node* next_node = nullptr;
     };
 
   public:
+    SingleLinkedList() = default;
+
     // Возвращает количество элементов в списке
     [[nodiscard]] size_t GetSize() const noexcept
     {
-        // Заглушка. Реализуйте метод самостоятельно
-        assert(false);
-        return 42;
+        return size_;
     }
 
     // Сообщает, пустой ли список
     [[nodiscard]] bool IsEmpty() const noexcept
     {
-        // Заглушка. Реализуйте метод самостоятельно
-        assert(false);
-        return false;
+        return size_ > 0 ? false : true;
     }
 
   private:
     // Фиктивный узел, используется для вставки "перед первым элементом"
-    Node head_;
-    size_t size_;
+    Node head_ = Node();
+    size_t size_ = 0;
 };
 
 void Test0()
