@@ -1,38 +1,60 @@
 #include <cassert>
-#include <iostream>
-#include <string_view>
-#include <vector>
 #include <cstdint>
+#include <iostream>
+#include <map>
+#include <string>
+#include <string_view>
 
 using namespace std;
 
-vector<string_view> SplitIntoWordsView(string_view str)
+class Translator
 {
-    vector<string_view> result;
+  public:
+    Translator() = default;
 
-    str.remove_prefix(min(str.find_first_not_of(" "), str.size()));
-
-    while (!str.empty())
+    void Add(string_view source, string_view target)
     {
-        int64_t space = str.find(' ');
-        result.push_back(str.substr(0, space));
-        str.remove_prefix(min(str.find(" "), str.size()));
-        str.remove_prefix(min(str.find_first_not_of(" "), str.size()));
+        if (source.empty() || target.empty())
+            return;
+        forward_[static_cast<string>(source)] = target;
+        backward_[static_cast<string>(target)] = source;
     }
 
-    return result;
+    string_view TranslateForward(string_view source) const
+    {
+        if(forward_.count(static_cast<string>(source)))
+        {
+            return forward_.at(static_cast<string>(source));
+        }
+        else return "";
+    }
+
+    string_view TranslateBackward(string_view target) const
+    {
+        if (backward_.count(static_cast<string>(target)))
+        {
+            return backward_.at(static_cast<string>(target));
+        }
+        else return "";
+    }
+
+  private:
+    map<string, string> forward_;
+    map<string, string> backward_;
+};
+
+void TestSimple()
+{
+    Translator translator;
+    translator.Add(string("okno"s), string("window"s));
+    translator.Add(string("stol"s), string("table"s));
+
+    assert(translator.TranslateForward("okno"s) == "window"s);
+    assert(translator.TranslateBackward("table"s) == "stol"s);
+    assert(translator.TranslateForward("table"s) == ""s);
 }
 
 int main()
 {
-    assert((SplitIntoWordsView("") == vector<string_view>{}));
-    assert((SplitIntoWordsView("     ") == vector<string_view>{}));
-    assert((SplitIntoWordsView("aaaaaaa") == vector{"aaaaaaa"sv}));
-    assert((SplitIntoWordsView("a") == vector{"a"sv}));
-    assert((SplitIntoWordsView("a b c") == vector{"a"sv, "b"sv, "c"sv}));
-    assert((SplitIntoWordsView("a    bbb   cc") == vector{"a"sv, "bbb"sv, "cc"sv}));
-    assert((SplitIntoWordsView("  a    bbb   cc") == vector{"a"sv, "bbb"sv, "cc"sv}));
-    assert((SplitIntoWordsView("a    bbb   cc   ") == vector{"a"sv, "bbb"sv, "cc"sv}));
-    assert((SplitIntoWordsView("  a    bbb   cc   ") == vector{"a"sv, "bbb"sv, "cc"sv}));
-    cout << "All OK" << endl;
+    TestSimple();
 }
