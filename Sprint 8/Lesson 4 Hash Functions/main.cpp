@@ -5,6 +5,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 
@@ -33,6 +34,13 @@ class VehiclePlate
         return digits_;
     }
 
+    bool operator==(const VehiclePlate& other) const
+    {
+        return (this->letters_ == other.letters_
+        && this->digits_ == other.digits_
+        && this->region_ == other.region_);
+    }
+
   private:
     array<char, 3> letters_;
     int digits_;
@@ -51,7 +59,7 @@ template <typename T> class HashableContainer
     void Insert(T elem)
     {
         int index = elem.Hash();
-
+        
         // если вектор недостаточно велик для этого индекса,
         // то увеличим его, выделив место с запасом
         if (index >= int(elements_.size()))
@@ -59,18 +67,19 @@ template <typename T> class HashableContainer
             elements_.resize(index * 2 + 1);
         }
 
-        elements_[index] = move(elem);
+        auto it = find(elements_[index].begin(), elements_[index].end(), elem);
+        if (it == elements_[index].end()) elements_[index].push_back(move(elem));
     }
 
     void PrintAll(ostream& out) const
     {
-        for (auto& e : elements_)
+        for (auto& internal : elements_)
         {
-            if (!e.has_value())
+            if (internal.empty()) continue;
+            for (auto& e : internal)
             {
-                continue;
+                out << e << endl;
             }
-            out << e.value() << endl;
         }
     }
 
@@ -80,7 +89,7 @@ template <typename T> class HashableContainer
     }
 
   private:
-    vector<optional<T>> elements_;
+    vector<vector<T>> elements_;
 };
 
 int main()
@@ -94,9 +103,11 @@ int main()
     plate_base.Insert({'H', 'E', 968, 'C', 79});
     plate_base.Insert({'T', 'A', 326, 'X', 83});
     plate_base.Insert({'H', 'H', 831, 'P', 116});
+    plate_base.Insert({'A', 'P', 831, 'Y', 99});
     plate_base.Insert({'P', 'M', 884, 'K', 23});
     plate_base.Insert({'O', 'C', 34, 'P', 24});
     plate_base.Insert({'M', 'Y', 831, 'M', 43});
+    plate_base.Insert({'B', 'P', 831, 'M', 79});
     plate_base.Insert({'K', 'T', 478, 'P', 49});
     plate_base.Insert({'X', 'P', 850, 'A', 50});
 
