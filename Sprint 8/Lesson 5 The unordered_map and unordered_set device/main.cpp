@@ -66,11 +66,10 @@ class VehiclePlateHasher
   public:
     size_t operator()(const VehiclePlate& plate) const
     {
-        // измените эту функцию, чтобы она учитывала все данные номера
-        // рекомендуется использовать метод ToString() и существующий
-        // класс hash<string>
-        return static_cast<size_t>(plate.Hash());
+        return hasher_(plate.ToString());
     }
+private:
+    hash<string> hasher_;
 };
 
 class ParkingCounter
@@ -79,14 +78,15 @@ class ParkingCounter
     // зарегистрировать парковку автомобиля
     void Park(VehiclePlate car)
     {
-        // место для вашей реализации
+        ++car_to_parks_[car];
     }
 
     // метод возвращает количество зарегистрированных
     // парковок автомобиля
     int GetCount(const VehiclePlate& car) const
     {
-        // место для вашей реализации
+        auto iter = car_to_parks_.find(car);
+        return iter != car_to_parks_.end() ? car_to_parks_.at(car) : 0;
     }
 
     auto& GetAllData() const
@@ -95,8 +95,8 @@ class ParkingCounter
     }
 
   private:
-    // для хранения данных используйте контейнер unordered_map
-    // назовите поле класса car_to_parks_
+    unordered_map<VehiclePlate, int, VehiclePlateHasher> car_to_parks_;
+
 };
 
 int main()
