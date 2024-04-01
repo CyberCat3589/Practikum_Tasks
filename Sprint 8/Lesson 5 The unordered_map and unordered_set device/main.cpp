@@ -1,5 +1,6 @@
 #include <array>
 #include <cassert>
+#include <chrono>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
@@ -44,11 +45,6 @@ class VehiclePlate
         return out.str();
     }
 
-    int Hash() const
-    {
-        return digits_;
-    }
-
   private:
     array<char, 3> letters_;
     int digits_;
@@ -61,70 +57,155 @@ ostream& operator<<(ostream& out, VehiclePlate plate)
     return out;
 }
 
-class VehiclePlateHasher
-{
-  public:
-    size_t operator()(const VehiclePlate& plate) const
-    {
-        return hasher_(plate.ToString());
-    }
-private:
-    hash<string> hasher_;
-};
+// возьмите реализацию хешера из прошлого задания
+class VehiclePlateHasher{};
 
-class ParkingCounter
+// выбросьте это исключение в случае ошибки парковки
+struct ParkingException {};
+
+template <typename Clock> class Parking
 {
+    // при обращении к типу внутри шаблонного параметра мы обязаны использовать
+    // typename; чтобы этого избежать, объявим псевдонимы для нужных типов
+    using Duration = typename Clock::duration;
+    using TimePoint = typename Clock::time_point;
+
   public:
-    // зарегистрировать парковку автомобиля
+    Parking(int cost_per_second) : cost_per_second_(cost_per_second)
+    {
+    }
+
+    // запарковать машину с указанным номером
     void Park(VehiclePlate car)
     {
-        ++car_to_parks_[car];
+        // место для вашей реализации
     }
 
-    // метод возвращает количество зарегистрированных
-    // парковок автомобиля
-    int GetCount(const VehiclePlate& car) const
+    // забрать машину с указанным номером
+    void Withdraw(const VehiclePlate& car)
     {
-        auto iter = car_to_parks_.find(car);
-        return iter != car_to_parks_.end() ? car_to_parks_.at(car) : 0;
+        // место для вашей реализации
     }
 
-    auto& GetAllData() const
+    // получить счёт за конкретный автомобиль
+    int64_t GetCurrentBill(const VehiclePlate& car) const
     {
-        return car_to_parks_;
+        // место для вашей реализации
+    }
+
+    // завершить расчётный период
+    // те машины, которые находятся на парковке на данный момент, должны
+    // остаться на парковке, но отсчёт времени для них начинается с нуля
+    unordered_map<VehiclePlate, int64_t, VehiclePlateHasher> EndPeriodAndGetBills()
+    {
+        // место для вашей реализации
+    }
+
+    // не меняйте этот метод
+    auto& GetNowParked() const
+    {
+        return now_parked_;
+    }
+
+    // не меняйте этот метод
+    auto& GetCompleteParks() const
+    {
+        return complete_parks_;
     }
 
   private:
-    unordered_map<VehiclePlate, int, VehiclePlateHasher> car_to_parks_;
+    int cost_per_second_;
+    unordered_map<VehiclePlate, TimePoint, VehiclePlateHasher> now_parked_;
+    unordered_map<VehiclePlate, Duration, VehiclePlateHasher> complete_parks_;
+};
 
+// эти часы удобно использовать для тестирования
+// они покажут столько времени, сколько вы задали явно
+class TestClock
+{
+  public:
+    using time_point = chrono::system_clock::time_point;
+    using duration = chrono::system_clock::duration;
+
+    static void SetNow(int seconds)
+    {
+        current_time_ = seconds;
+    }
+
+    static time_point now()
+    {
+        return start_point_ + chrono::seconds(current_time_);
+    }
+
+  private:
+    inline static time_point start_point_ = chrono::system_clock::now();
+    inline static int current_time_ = 0;
 };
 
 int main()
 {
-    ParkingCounter parking;
+    Parking<TestClock> parking(10);
 
-    parking.Park({'B', 'H', 840, 'E', 99});
-    parking.Park({'O', 'K', 942, 'K', 78});
-    parking.Park({'O', 'K', 942, 'K', 78});
-    parking.Park({'O', 'K', 942, 'K', 78});
-    parking.Park({'O', 'K', 942, 'K', 78});
-    parking.Park({'H', 'E', 968, 'C', 79});
-    parking.Park({'T', 'A', 326, 'X', 83});
-    parking.Park({'H', 'H', 831, 'P', 116});
-    parking.Park({'A', 'P', 831, 'Y', 99});
-    parking.Park({'P', 'M', 884, 'K', 23});
-    parking.Park({'O', 'C', 34, 'P', 24});
-    parking.Park({'M', 'Y', 831, 'M', 43});
-    parking.Park({'B', 'P', 831, 'M', 79});
-    parking.Park({'O', 'K', 942, 'K', 78});
-    parking.Park({'K', 'T', 478, 'P', 49});
-    parking.Park({'X', 'P', 850, 'A', 50});
+    TestClock::SetNow(10);
+    parking.Park({'A', 'A', 111, 'A', 99});
 
-    assert(parking.GetCount({'O', 'K', 942, 'K', 78}) == 5);
-    assert(parking.GetCount({'A', 'B', 111, 'C', 99}) == 0);
+    TestClock::SetNow(20);
+    parking.Withdraw({'A', 'A', 111, 'A', 99});
+    parking.Park({'B', 'B', 222, 'B', 99});
 
-    for (const auto& [plate, count] : parking.GetAllData())
+    TestClock::SetNow(40);
+    assert(parking.GetCurrentBill({'A', 'A', 111, 'A', 99}) == 100);
+    assert(parking.GetCurrentBill({'B', 'B', 222, 'B', 99}) == 200);
+    parking.Park({'A', 'A', 111, 'A', 99});
+
+    TestClock::SetNow(50);
+    assert(parking.GetCurrentBill({'A', 'A', 111, 'A', 99}) == 200);
+    assert(parking.GetCurrentBill({'B', 'B', 222, 'B', 99}) == 300);
+    assert(parking.GetCurrentBill({'C', 'C', 333, 'C', 99}) == 0);
+    parking.Withdraw({'B', 'B', 222, 'B', 99});
+
+    TestClock::SetNow(70);
     {
-        cout << plate << " "s << count << endl;
+        // проверим счёт
+        auto bill = parking.EndPeriodAndGetBills();
+
+        // так как внутри макроса используется запятая,
+        // нужно заключить его аргумент в дополнительные скобки
+        assert((bill == unordered_map<VehiclePlate, int64_t, VehiclePlateHasher>{
+                            {{'A', 'A', 111, 'A', 99}, 400},
+                            {{'B', 'B', 222, 'B', 99}, 300},
+                        }));
     }
+
+    TestClock::SetNow(80);
+    {
+        // проверим счёт
+        auto bill = parking.EndPeriodAndGetBills();
+
+        // так как внутри макроса используется запятая,
+        // нужно заключить его аргумент в дополнительные скобки
+        assert((bill == unordered_map<VehiclePlate, int64_t, VehiclePlateHasher>{
+                            {{'A', 'A', 111, 'A', 99}, 100},
+                        }));
+    }
+
+    try
+    {
+        parking.Park({'A', 'A', 111, 'A', 99});
+        assert(false);
+    }
+    catch (ParkingException)
+    {
+    }
+
+    try
+    {
+        parking.Withdraw({'B', 'B', 222, 'B', 99});
+        assert(false);
+    }
+    catch (ParkingException)
+    {
+    }
+
+    cout << "Success!"s << endl;
 }
