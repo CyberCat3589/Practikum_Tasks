@@ -58,7 +58,17 @@ ostream& operator<<(ostream& out, VehiclePlate plate)
 }
 
 // возьмите реализацию хешера из прошлого задания
-class VehiclePlateHasher{};
+class VehiclePlateHasher
+{
+  public:
+    size_t operator()(const VehiclePlate& plate) const
+    {
+        return static_cast<size_t>(hasher_(plate.ToString()));
+    }
+
+  private:
+    hash<string> hasher_;
+};
 
 // выбросьте это исключение в случае ошибки парковки
 struct ParkingException {};
@@ -71,26 +81,43 @@ template <typename Clock> class Parking
     using TimePoint = typename Clock::time_point;
 
   public:
-    Parking(int cost_per_second) : cost_per_second_(cost_per_second)
-    {
-    }
+    Parking(int cost_per_second) : cost_per_second_(cost_per_second){}
 
     // запарковать машину с указанным номером
     void Park(VehiclePlate car)
     {
-        // место для вашей реализации
+        auto iter = now_parked_.find(car);
+        if(iter != now_parked_.end()) throw ParkingException();
+        else now_parked_[car] = Clock::now();
     }
 
     // забрать машину с указанным номером
     void Withdraw(const VehiclePlate& car)
     {
-        // место для вашей реализации
+        auto iter = now_parked_.find(car);
+        if (iter == now_parked_.end()) throw ParkingException();
+
+        Duration park_dur = Clock::now() - now_parked_.at(car);
+        now_parked_.erase(car);
+        complete_parks_[car] += park_dur;
     }
 
     // получить счёт за конкретный автомобиль
     int64_t GetCurrentBill(const VehiclePlate& car) const
     {
-        // место для вашей реализации
+        int64_t cost = 0;
+
+        if (auto iter = complete_parks_.find(car); iter != complete_parks_.end())
+        {
+            Duration duration = complete_parks_.at(car);
+            cost += chrono::duration_cast<chrono::seconds>(duration).count() * cost_per_second_;
+        }
+        if (auto iter = now_parked_.find(car); iter != now_parked_.end())
+        {
+            Duration duration = Clock::now() - now_parked_.at(car);
+            cost += chrono::duration_cast<chrono::seconds>(duration).count() * cost_per_second_;
+        }
+        return cost;
     }
 
     // завершить расчётный период
@@ -98,7 +125,23 @@ template <typename Clock> class Parking
     // остаться на парковке, но отсчёт времени для них начинается с нуля
     unordered_map<VehiclePlate, int64_t, VehiclePlateHasher> EndPeriodAndGetBills()
     {
-        // место для вашей реализации
+        unordered_map<VehiclePlate, int64_t, VehiclePlateHasher> accounts;
+
+        for(auto [car, start_time] : now_parked_)
+        {
+            Duration park_duration = Clock::now() - start_time;
+            accounts[car] += chrono::duration_cast<chrono::seconds>(park_duration).count() * cost_per_second_;
+            now_parked_[car] = Clock::now();
+        }
+
+        for(auto [car, duration] : complete_parks_)
+        {
+            int64_t cost = chrono::duration_cast<chrono::seconds>(duration).count() * cost_per_second_;
+            accounts[car] += cost;
+        }
+        complete_parks_.clear();
+
+        return accounts;
     }
 
     // не меняйте этот метод
