@@ -93,8 +93,12 @@ struct PlateHasherString
 
 struct PlateHasherAll
 {
-    // реализуйте собственный хешер, который будет
-    // эффективнее и лучше всех остальных
+    size_t operator()(const VehiclePlate& plate) const
+    {
+        array<char, 3> letters = plate.GetLetters();
+        return static_cast<size_t>(plate.GetDigits() + plate.GetRegion() * 1000ULL + (letters[0] - 'A') * 1'000'000ULL
+        + (letters[1] - 'A') * 100'000'000ULL + (letters[2] - 'A') * 10'000'000'000ULL);
+    }
 };
 
 ostream& operator<<(ostream& out, VehiclePlate plate)
