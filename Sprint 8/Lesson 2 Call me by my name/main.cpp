@@ -4,8 +4,8 @@
 #include <numeric>
 #include <vector>
 
-// не меняйте файлы json.h и json.cpp
-#include "json.h"
+// не меняйте файлы xml.h и xml.cpp
+#include "xml.h"
 
 using namespace std;
 
@@ -28,21 +28,15 @@ string FindMostExpensiveCategory(const vector<Spending>& spendings)
     return max_element(begin(spendings), end(spendings), compare_by_amount)->category;
 }
 
-vector<Spending> LoadFromJson(istream& input)
+vector<Spending> LoadFromXml(istream& input)
 {
-    Document doc = Load(input);
-    vector<Spending> result;
-    for (const Node& node : doc.GetRoot().AsArray()) {
-        result.push_back({node.AsMap().at("category"s).AsString(),
-                          node.AsMap().at("amount"s).AsInt()});
-    }
-    return result;
+    // место для вашей реализации
+    // пример корректного XML-документа в условии
 }
 
 int main()
 {
-    // не меняйте main
-    const vector<Spending> spendings = LoadFromJson(cin);
+    const vector<Spending> spendings = LoadFromXml(cin);
     cout << "Total "sv << CalculateTotalSpendings(spendings) << '\n';
     cout << "Most expensive is "sv << FindMostExpensiveCategory(spendings) << '\n';
 }
