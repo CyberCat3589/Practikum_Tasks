@@ -30,8 +30,16 @@ string FindMostExpensiveCategory(const vector<Spending>& spendings)
 
 vector<Spending> LoadFromXml(istream& input)
 {
-    // место для вашей реализации
-    // пример корректного XML-документа в условии
+    vector<Spending> result;
+    Document doc = Load(input);
+    for(auto node : doc.GetRoot().Children())
+    {
+        Spending temp;
+        temp.category = node.AttributeValue<string>("category"); 
+        temp.amount = node.AttributeValue<int>("amount");
+        result.push_back(move(temp));
+    }
+    return result;
 }
 
 int main()
