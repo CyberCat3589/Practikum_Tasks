@@ -4,6 +4,8 @@
 
 // поместите все имена библиотеки INI в пространство имён ini
 
+namespace ini
+{
 using Section = std::unordered_map<std::string, std::string>;
 
 class Document {
@@ -19,3 +21,4 @@ private:
 
 // определение этой функции должно быть в файле ini.cpp
 Document Load(std::istream& input);
+}
