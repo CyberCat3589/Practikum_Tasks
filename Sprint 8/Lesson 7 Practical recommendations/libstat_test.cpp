@@ -4,16 +4,23 @@
 #include <cmath>
 #include <sstream>
 
-template <typename T>
-string GetPrinterValue(AggregPrinter<T>& printer) {
-    ostringstream out;
+using namespace std::literals;
+
+namespace statistics::tests::detail
+{
+template <typename T> 
+std::string GetPrinterValue(statistics::AggregPrinter<T>& printer)
+{
+    std::ostringstream out;
     printer.Print(out);
 
     return std::move(out).str();
 }
+}  // namespace statistics::tests::detail
 
-void TestStatAggregSum() {
-    SumAggregation aggreg;
+void statistics::tests::AggregSum()
+{
+    statistics::aggregations::Sum aggreg;
     assert(*aggreg.Get() == 0);
 
     aggreg.PutValue(10.);
@@ -23,8 +30,9 @@ void TestStatAggregSum() {
     assert(*aggreg.Get() == -10.);
 }
 
-void TestStatAggregMax() {
-    AggregateMaximum aggreg;
+void statistics::tests::AggregMax()
+{
+    statistics::aggregations::Max aggreg;
     assert(!aggreg.Get());
 
     aggreg.PutValue(10.);
@@ -34,8 +42,9 @@ void TestStatAggregMax() {
     assert(*aggreg.Get() == 20.);
 }
 
-void TestStatAggregMean() {
-    AggregatorAverage aggreg;
+void statistics::tests::AggregMean()
+{
+    statistics::aggregations::Mean aggreg;
     assert(!aggreg.Get());
 
     aggreg.PutValue(10.);
@@ -46,8 +55,9 @@ void TestStatAggregMean() {
     assert(*aggreg.Get() == 5.);
 }
 
-void TestStatAggregStandardDeviation() {
-    AggregStd aggreg;
+void statistics::tests::AggregStandardDeviation()
+{
+    statistics::aggregations::StandardDeviation aggreg;
     assert(!aggreg.Get());
 
     aggreg.PutValue(10.);
@@ -65,8 +75,9 @@ void TestStatAggregStandardDeviation() {
     assert(std::abs(*aggreg.Get() - 5.) < 1e-5);
 }
 
-void TestStatAggregMode() {
-    Mode aggreg;
+void statistics::tests::AggregMode()
+{
+    statistics::aggregations::Mode aggreg;
     assert(!aggreg.Get());
 
     aggreg.PutValue(1.1);
@@ -82,10 +93,11 @@ void TestStatAggregMode() {
     assert(std::round(*aggreg.Get()) == 2.);
 }
 
-void TestStatAggregPrinter() {
-    AggregPrinter<AggregateMaximum> printer;
+void statistics::tests::AggregPrinter()
+{
+    statistics::AggregPrinter<statistics::aggregations::Max> printer;
 
-    assert(GetPrinterValue(printer) == "max is undefined\n"s);
+    assert(statistics::tests::detail::GetPrinterValue(printer) == "max is undefined\n"s);
     printer.PutValue(10.);
     printer.PutValue(20.);
     printer.PutValue(-40.);
@@ -93,5 +105,5 @@ void TestStatAggregPrinter() {
     std::ostringstream out;
     out << 20.;
 
-    assert(GetPrinterValue(printer) == "max is "s + out.str() + "\n"s);
+    assert(statistics::tests::detail::GetPrinterValue(printer) == "max is "s + out.str() + "\n"s);
 }
