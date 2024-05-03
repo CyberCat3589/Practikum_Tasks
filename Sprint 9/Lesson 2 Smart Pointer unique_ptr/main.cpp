@@ -7,9 +7,8 @@ using namespace std;
 
 struct Cat
 {
-    Cat(const string& name, int age) : name_(name), age_(age)  //
-    {
-    }
+    Cat(const string& name, int age) : name_(name), age_(age) {}
+
     const string& GetName() const noexcept
     {
         return name_;
@@ -18,9 +17,9 @@ struct Cat
     {
         return age_;
     }
-    ~Cat()
-    {
-    }
+
+    ~Cat(){}
+
     void Speak() const
     {
         cout << "Meow!"s << endl;
@@ -40,8 +39,25 @@ unique_ptr<Cat> CreateCat(const string& name)
 class Witch
 {
   public:
-    explicit Witch(const string& name) : name_(name)
+    explicit Witch(const string& name) : name_(name){}
+
+    Witch(Witch&&) = default;
+    Witch& operator=(Witch&&) = default;
+
+    Witch(const Witch& other)
     {
+        name_ = other.name_;
+        cat_ = make_unique<Cat>(other.cat_->GetName(), other.cat_->GetAge());
+    }
+
+    Witch& operator=(const Witch& other)
+    {
+        if(this != &other)
+        {
+            name_ = other.name_;
+            cat_ = make_unique<Cat>(other.cat_->GetName(), other.cat_->GetAge());
+        }
+        return *this;
     }
 
     const string& GetName() const noexcept
@@ -130,4 +146,5 @@ void Test()
 int main()
 {
     Test();
+    cout << "Test OK" << endl;
 }
