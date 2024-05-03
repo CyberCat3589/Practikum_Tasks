@@ -1,150 +1,134 @@
 #include <cassert>
 #include <iostream>
 #include <memory>
-#include <string>
 
-using namespace std;
+template <typename T> 
+struct TreeNode;
 
-struct Cat
+template <typename T> 
+using TreeNodePtr = std::unique_ptr<TreeNode<T>>;
+
+template <typename T> 
+struct TreeNode
 {
-    Cat(const string& name, int age) : name_(name), age_(age) {}
-
-    const string& GetName() const noexcept
+    // Используйте TreeNodePtr<T> вместо сырых указателей.
+    // Примите умные указатели по rvalue-ссылке.
+    TreeNode(T val, TreeNode<T>* left, TreeNode<T>* right) : value(std::move(val)), left(left), right(right)
     {
-        return name_;
-    }
-    int GetAge() const noexcept
-    {
-        return age_;
     }
 
-    ~Cat(){}
+    T value;
+    TreeNode* left;   // Замените TreeNode* на TreeNodePtr<T>
+    TreeNode* right;  // Замените TreeNode* на TreeNodePtr<T>
 
-    void Speak() const
-    {
-        cout << "Meow!"s << endl;
-    }
-
-  private:
-    string name_;
-    int age_;
+    // parent оставьте обычным указателем, иначе возникнет
+    // кольцевая зависимость.
+    TreeNode* parent = nullptr;
 };
 
-// Функция создаёт двухлетних котов
-unique_ptr<Cat> CreateCat(const string& name)
+template <typename T> 
+bool CheckTreeProperty(const TreeNode<T>* node, const T* min, const T* max) noexcept
 {
-    return make_unique<Cat>(name, 2);
+    if (!node)
+    {
+        return true;
+    }
+    if ((min && node->value <= *min) || (max && node->value >= *max))
+    {
+        return false;
+    }
+    return CheckTreeProperty(node->left, min, &node->value) && CheckTreeProperty(node->right, &node->value, max);
 }
 
-class Witch
+template <class T> 
+bool CheckTreeProperty(const TreeNode<T>* node) noexcept
 {
-  public:
-    explicit Witch(const string& name) : name_(name){}
+    return CheckTreeProperty<T>(node, nullptr, nullptr);
+}
 
-    Witch(Witch&&) = default;
-    Witch& operator=(Witch&&) = default;
-
-    Witch(const Witch& other)
+template <typename T> 
+TreeNode<T>* begin(TreeNode<T>* node) noexcept
+{
+    while (node->left)
     {
-        name_ = other.name_;
-        cat_ = make_unique<Cat>(other.cat_->GetName(), other.cat_->GetAge());
+        node = node->left;
     }
 
-    Witch& operator=(const Witch& other)
+    return node;
+}
+
+template <typename T> 
+TreeNode<T>* next(TreeNode<T>* node) noexcept
+{
+    if (node->right)
     {
-        if(this != &other)
+        return begin(node->right);
+    }
+    while (node->parent)
+    {
+        bool is_right = (node == node->parent->right);
+        if (!is_right)
         {
-            name_ = other.name_;
-            cat_ = make_unique<Cat>(other.cat_->GetName(), other.cat_->GetAge());
+            return node->parent;
         }
-        return *this;
+        node = node->parent;
     }
 
-    const string& GetName() const noexcept
-    {
-        return name_;
-    }
-    void SetCat(unique_ptr<Cat>&& cat) noexcept
-    {
-        cat_ = std::move(cat);
-    }
-    unique_ptr<Cat> ReleaseCat() noexcept
-    {
-        return std::move(cat_);
-    }
+    return nullptr;
+}
 
-  private:
-    string name_;
-    unique_ptr<Cat> cat_;
-};
-
-void Test()
+// Замените указатели на умные. Сигнатура функции должна стать такой:
+// TreeNodePtr<int> N(int val, TreeNodePtr<int>&& left = {}, TreeNodePtr<int>&& right = {})
+TreeNode<int>* N(int val, TreeNode<int>* left = {}, TreeNode<int>* right = {})
 {
-    // Объекты Witch можно перемещать
+    auto node = new TreeNode<int>(val, left, right);
+    if (node->left)
     {
-        Witch witch("Hermione"s);
-        auto cat = CreateCat("Crookshanks"s);
-        Cat* raw_cat = cat.get();
-        assert(raw_cat);
-        witch.SetCat(move(cat));
-
-        Witch moved_witch(std::move(witch));
-        auto released_cat = moved_witch.ReleaseCat();
-        assert(released_cat.get() == raw_cat);  // Кот переместился от witch к moved_witch
+        node->left->parent = node;
+    }
+    if (node->right)
+    {
+        node->right->parent = node;
     }
 
-    // Можно использовать перемещающий оператор присваивания
-    {
-        Witch witch("Hermione"s);
-        auto cat = CreateCat("Crookshanks"s);
-        Cat* raw_cat = cat.get();
-        witch.SetCat(move(cat));
+    return node;
+}
 
-        Witch witch2("Minerva McGonagall");
-        witch2 = move(witch);
-        auto released_cat = witch.ReleaseCat();
-        assert(!released_cat);
-        released_cat = witch2.ReleaseCat();
-        assert(released_cat.get() == raw_cat);
+// Благодаря умным указателям эта функция больше не понадобится.
+// Удалите её.
+template <class T> 
+void DeleteTree(TreeNode<T>* node)
+{
+    if (!node)
+    {
+        return;
     }
 
-    // Можно копировать волшебниц
-    {
-        Witch witch("Hermione");
-        auto cat = CreateCat("Crookshanks"s);
-        witch.SetCat(move(cat));
+    DeleteTree(node->left);
+    DeleteTree(node->right);
 
-        Witch witch_copy(witch);
-        assert(!cat);
-        cat = witch.ReleaseCat();
-        assert(cat);  // У первой волшебницы кот никуда не делся
-
-        auto cat_copy = witch_copy.ReleaseCat();
-        assert(cat_copy != nullptr && cat_copy != cat);
-        assert(cat_copy->GetName() == cat->GetName());  // Копия волшебницы содержит копию кота
-    }
-
-    // Работает копирующее присваивание волшебниц
-    {
-        Witch witch("Hermione"s);
-        auto cat = CreateCat("Crookshanks"s);
-        witch.SetCat(move(cat));
-
-        Witch witch2("Minerva McGonagall"s);
-        witch2 = witch;
-
-        assert(!cat);
-        cat = witch.ReleaseCat();
-        assert(cat);  // У первой волшебницы кот никуда не делся
-
-        auto cat_copy = witch2.ReleaseCat();
-        assert(cat_copy != nullptr && cat_copy != cat);
-        assert(cat_copy->GetName() == cat->GetName());  // При присваивании скопировался кот
-    }
+    delete node;
 }
 
 int main()
 {
-    Test();
-    cout << "Test OK" << endl;
+    using namespace std;
+    using T = TreeNode<int>;
+    auto root1 = N(6, N(4, N(3), N(5)), N(7));
+    assert(CheckTreeProperty(root1));
+
+    T* iter = begin(root1);
+    while (iter)
+    {
+        cout << iter->value << " "s;
+        iter = next(iter);
+    }
+    cout << endl;
+
+    auto root2 = N(6, N(4, N(3), N(5)), N(7, N(8)));
+    assert(!CheckTreeProperty(root2));
+
+    // Удалите вызовы функции DeleteTree.
+    DeleteTree(root1);
+    DeleteTree(root2);
 }
