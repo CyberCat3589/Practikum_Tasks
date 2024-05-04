@@ -13,13 +13,11 @@ struct TreeNode
 {
     // Используйте TreeNodePtr<T> вместо сырых указателей.
     // Примите умные указатели по rvalue-ссылке.
-    TreeNode(T val, TreeNode<T>* left, TreeNode<T>* right) : value(std::move(val)), left(left), right(right)
-    {
-    }
+    TreeNode(T val, TreeNodePtr<T>&& left, TreeNodePtr<T>&& right) : value(std::move(val)), left(std::move(left)), right(std::move(right)) {}
 
     T value;
-    TreeNode* left;   // Замените TreeNode* на TreeNodePtr<T>
-    TreeNode* right;  // Замените TreeNode* на TreeNodePtr<T>
+    TreeNodePtr<T> left;   // Замените TreeNode* на TreeNodePtr<T>
+    TreeNodePtr<T> right;  // Замените TreeNode* на TreeNodePtr<T>
 
     // parent оставьте обычным указателем, иначе возникнет
     // кольцевая зависимость.
@@ -37,7 +35,7 @@ bool CheckTreeProperty(const TreeNode<T>* node, const T* min, const T* max) noex
     {
         return false;
     }
-    return CheckTreeProperty(node->left, min, &node->value) && CheckTreeProperty(node->right, &node->value, max);
+    return CheckTreeProperty(node->left.get(), min, &node->value) && CheckTreeProperty(node->right.get(), &node->value, max);
 }
 
 template <class T> 
@@ -51,7 +49,7 @@ TreeNode<T>* begin(TreeNode<T>* node) noexcept
 {
     while (node->left)
     {
-        node = node->left;
+        node = node->left.get();
     }
 
     return node;
@@ -62,11 +60,11 @@ TreeNode<T>* next(TreeNode<T>* node) noexcept
 {
     if (node->right)
     {
-        return begin(node->right);
+        return begin(node->right.get());
     }
     while (node->parent)
     {
-        bool is_right = (node == node->parent->right);
+        bool is_right = (node == node->parent->right.get());
         if (!is_right)
         {
             return node->parent;
@@ -79,35 +77,19 @@ TreeNode<T>* next(TreeNode<T>* node) noexcept
 
 // Замените указатели на умные. Сигнатура функции должна стать такой:
 // TreeNodePtr<int> N(int val, TreeNodePtr<int>&& left = {}, TreeNodePtr<int>&& right = {})
-TreeNode<int>* N(int val, TreeNode<int>* left = {}, TreeNode<int>* right = {})
+TreeNodePtr<int> N(int val, TreeNodePtr<int>&& left = {}, TreeNodePtr<int>&& right = {})
 {
-    auto node = new TreeNode<int>(val, left, right);
+    auto node = std::make_unique<TreeNode<int>>(val, std::move(left), std::move(right));
     if (node->left)
     {
-        node->left->parent = node;
+        node->left->parent = node.get();
     }
     if (node->right)
     {
-        node->right->parent = node;
+        node->right->parent = node.get();
     }
 
     return node;
-}
-
-// Благодаря умным указателям эта функция больше не понадобится.
-// Удалите её.
-template <class T> 
-void DeleteTree(TreeNode<T>* node)
-{
-    if (!node)
-    {
-        return;
-    }
-
-    DeleteTree(node->left);
-    DeleteTree(node->right);
-
-    delete node;
 }
 
 int main()
@@ -115,9 +97,9 @@ int main()
     using namespace std;
     using T = TreeNode<int>;
     auto root1 = N(6, N(4, N(3), N(5)), N(7));
-    assert(CheckTreeProperty(root1));
+    assert(CheckTreeProperty(root1.get()));
 
-    T* iter = begin(root1);
+    T* iter = begin(root1.get());
     while (iter)
     {
         cout << iter->value << " "s;
@@ -126,9 +108,5 @@ int main()
     cout << endl;
 
     auto root2 = N(6, N(4, N(3), N(5)), N(7, N(8)));
-    assert(!CheckTreeProperty(root2));
-
-    // Удалите вызовы функции DeleteTree.
-    DeleteTree(root1);
-    DeleteTree(root2);
+    assert(!CheckTreeProperty(root2.get()));
 }
