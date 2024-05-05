@@ -2,9 +2,16 @@
 
 #include <optional>
 #include <string_view>
+#include <memory>
 
 class BiMap {
 public:
+    BiMap();
+    ~BiMap();
+    BiMap(BiMap&&) noexcept;
+    BiMap(const BiMap& other);
+    BiMap& operator=(BiMap&&) noexcept;
+    BiMap& operator=(const BiMap& other);
     /**
      * Добавляет в словарь пару "ключ-значение".
      * В случае успеха возвращает true.
@@ -26,4 +33,6 @@ public:
 
 private:
     /* Класс должен использовать идиому Pimpl, поддерживать копирование и перемещение */
+    struct Impl;
+    std::unique_ptr<Impl> impl_;
 };
