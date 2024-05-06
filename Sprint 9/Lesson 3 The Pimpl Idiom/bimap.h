@@ -4,14 +4,15 @@
 #include <string_view>
 #include <memory>
 
-class BiMap {
+class BiMap 
+{
 public:
     BiMap();
-    ~BiMap();
-    BiMap(BiMap&&) noexcept;
     BiMap(const BiMap& other);
-    BiMap& operator=(BiMap&&) noexcept;
+    BiMap(BiMap&& other) noexcept;
     BiMap& operator=(const BiMap& other);
+    BiMap& operator=(BiMap&& other) noexcept;
+    ~BiMap();
     /**
      * Добавляет в словарь пару "ключ-значение".
      * В случае успеха возвращает true.

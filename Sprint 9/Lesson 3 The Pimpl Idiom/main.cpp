@@ -2,7 +2,8 @@
 
 #include "bimap.h"
 
-int main() {
+int main()
+{
     using namespace std::literals;
 
     BiMap bimap;
