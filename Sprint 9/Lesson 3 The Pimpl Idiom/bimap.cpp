@@ -3,7 +3,6 @@
 #include<string>
 #include <deque>
 #include <cassert>
-#include <iostream>
 
 struct KeyVal
 {
@@ -15,20 +14,15 @@ struct BiMap::Impl
 {
     bool Add(std::string_view key, std::string_view value)
     {
-        if(key_to_value.count(key) || value_to_key.count(value))
+        if (key_to_value.count(key) || value_to_key.count(value))
         {
             return false;
         }
 
         storage.push_back({std::string(key), std::string(value)});
 
-        KeyVal kv = storage.back();
-
-        key_to_value[kv.key] = kv.value;
-        value_to_key[kv.value] = kv.key;
-
-        std::cout << "Добавлен ключ " << key_to_value[kv.value]
-        << " Добавлено значение " << value_to_key[kv.key] << std::endl;
+        key_to_value[storage.back().key] = storage.back().value;
+        value_to_key[storage.back().value] = storage.back().key;
 
         return true;
     }
@@ -37,10 +31,8 @@ struct BiMap::Impl
     {
         if(auto it = key_to_value.find(key); it != key_to_value.end())
         {
-            std::cout << "Value - " << it->second;
             return it->second;
         }
-        std::cout << "NULL";
         return std::nullopt;
     }
 
