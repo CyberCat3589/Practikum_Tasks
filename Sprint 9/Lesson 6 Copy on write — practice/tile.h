@@ -1,6 +1,7 @@
 #pragma once
 #include <array>
 #include <cassert>
+#include <vector>
 
 #include "geom.h"
 
@@ -12,6 +13,7 @@ public:
     // Конструктор по умолчанию. Заполняет тайл указанным цветом.
     Tile(char color = ' ') noexcept {
         /* Реализуйте недостающий код самостоятельно. */
+        pixels_ = std::vector<std::vector<char>>(SIZE, std::vector<char>(SIZE, color)); 
 
         // -------------- не удалять ------------
         assert(instance_count_ >= 0);
@@ -21,6 +23,7 @@ public:
 
     Tile(const Tile& other) {
         /* Реализуйте недостающий код самостоятельно. */
+        pixels_ = other.pixels_;
 
         // -------------- не удалять ------------
         assert(instance_count_ >= 0);
@@ -41,6 +44,10 @@ public:
      */
     void SetPixel(Point p, char color) noexcept {
         /* Реализуйте недостающий код самостоятельно. */
+        if(p.y >= 0 && p.y <= SIZE && p.x >= 0 && p.x <= SIZE)
+        {
+            pixels_[p.y][p.x] = color;
+        } 
     }
 
     /**
@@ -48,6 +55,10 @@ public:
      */
     char GetPixel(Point p) const noexcept {
         /* Реализуйте недостающий функционал самостоятельно. */
+        if (IsPointInSize(p, {SIZE, SIZE}))
+        {
+            return pixels_[p.y][p.x];
+        }
         return ' ';
     }
 
@@ -64,5 +75,5 @@ private:
     // -------------- не удалять ------------
 
     /* Разместите здесь поля для хранения пикселей тайла. */
-
+    std::vector<std::vector<char>> pixels_;
 };
