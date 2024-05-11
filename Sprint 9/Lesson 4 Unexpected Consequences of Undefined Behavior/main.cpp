@@ -5,7 +5,7 @@ using namespace std;
 
 // clang-format off
 
-const int NUM_PLANETS = 9;
+const int NUM_PLANETS = 8;
 const string_view PLANETS[] = {
     "Mercury"sv, "Venus"sv, "Earth"sv,
     "Mars"sv, "Jupiter"sv, "Saturn"sv,
@@ -33,8 +33,7 @@ void Test(string_view name)
 
 int main()
 {
-    Test("Earth"sv);
-    Test("Jupiter"sv);
-    Test("Pluto"sv);
-    Test("Moon"sv);
+    string name;
+    getline(cin, name);
+    Test(name);
 }
