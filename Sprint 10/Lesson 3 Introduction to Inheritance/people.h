@@ -1,5 +1,27 @@
 #pragma once
+#include <set>
 #include <string>
+
+enum class Gender
+{
+    MALE,
+    FEMALE
+};
+
+class Person
+{
+  public:
+    Person(const std::string& name, int age, Gender gender);
+
+    const std::string& GetName() const;
+    int GetAge() const;
+    Gender GetGender() const;
+
+  private:
+    std::string name_;
+    int age_;
+    Gender gender_;
+};
 
 enum class ProgrammingLanguage
 {
@@ -9,21 +31,11 @@ enum class ProgrammingLanguage
     PHP
 };
 
-enum class Gender
-{
-    MALE,
-    FEMALE
-};
-
 // Программист. Знает несколько языков программирования
-class Programmer
+class Programmer : public Person
 {
   public:
     Programmer(const std::string& name, int age, Gender gender);
-
-    const std::string& GetName() const;
-    int GetAge() const;
-    Gender GetGender() const;
 
     // Добавляет программисту знание языка программирования language
     // После вызова этого метода программист может программировать на этом языке
@@ -33,6 +45,9 @@ class Programmer
     // Сообщает, может ли программист программировать на языке прогарммирования language
     // Изначально программист не владеет ни одним языком программирования
     bool CanProgram(ProgrammingLanguage language) const;
+
+  private:
+    std::set<ProgrammingLanguage> languages_;
 };
 
 enum class WorkerSpeciality
@@ -45,14 +60,10 @@ enum class WorkerSpeciality
 };
 
 // Рабочий. Владеет несколькими специальностями
-class Worker
+class Worker : public Person
 {
   public:
     Worker(const std::string& name, int age, Gender gender);
-
-    const std::string& GetName() const;
-    int GetAge() const;
-    Gender GetGender() const;
 
     // Добавляет рабочему способность работать по специальности speciality
     void AddSpeciality(WorkerSpeciality speciality);
@@ -60,4 +71,7 @@ class Worker
     // Сообщает, может ли рабочий работать по указанной специальности.
     // Сразу после своего создания рабочий не владеет никакими специальностями
     bool HasSpeciality(WorkerSpeciality speciality) const;
+
+  private:
+    std::set<WorkerSpeciality> specialities_;
 };

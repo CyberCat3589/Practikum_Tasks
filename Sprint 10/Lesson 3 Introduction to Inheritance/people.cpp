@@ -4,57 +4,43 @@
 
 using namespace std;
 
-Programmer::Programmer(const string& name, int age, Gender gender) {
-    // Напишите тело конструктора
+Person::Person(const std::string& name, int age, Gender gender) : name_(name), age_(age), gender_(gender){}
+
+const std::string& Person::GetName() const
+{
+    return name_;
 }
 
-const string& Programmer::GetName() const {
-    // Заглушка, реализуйте метод самостоятельно
-    throw std::logic_error("Not implemented"s);
+int Person::GetAge() const
+{
+    return age_;
 }
 
-int Programmer::GetAge() const {
-    // Заглушка, реализуйте метод самостоятельно
-    return 0;
+Gender Person::GetGender() const
+{
+    return gender_;
 }
 
-Gender Programmer::GetGender() const {
-    // Заглушка, реализуйте метод самостоятельно
-    return Gender::MALE;
+Programmer::Programmer(const string& name, int age, Gender gender): Person(name, age, gender){}
+
+void Programmer::AddProgrammingLanguage(ProgrammingLanguage language)
+{
+    languages_.insert(language);
 }
 
-void Programmer::AddProgrammingLanguage(ProgrammingLanguage language) {
-    // Заглушка, реализуйте метод самостоятельно
+bool Programmer::CanProgram(ProgrammingLanguage language) const
+{
+    return languages_.find(language) == languages_.end() ? false : true;
 }
 
-bool Programmer::CanProgram(ProgrammingLanguage language) const {
-    // Заглушка, реализуйте метод самостоятельно
-    return false;
+Worker::Worker(const string& name, int age, Gender gender) : Person(name, age, gender){}
+
+void Worker::AddSpeciality(WorkerSpeciality speciality)
+{
+    specialities_.insert(speciality);
 }
 
-Worker::Worker(const string& name, int age, Gender gender) {
-    // Заглушка, реализуйте конструктор самостоятельно
-}
-
-const string& Worker::GetName() const {
-    // Заглушка, реализуйте метод самостоятельно
-    throw std::logic_error("Not implemented"s);
-}
-
-int Worker::GetAge() const {
-    // Заглушка, реализуйте метод самостоятельно
-    return 0;
-}
-
-Gender Worker::GetGender() const {
-    return Gender::MALE;
-}
-
-void Worker::AddSpeciality(WorkerSpeciality speciality) {
-    // Заглушка, реализуйте метод самостоятельно
-}
-
-bool Worker::HasSpeciality(WorkerSpeciality speciality) const {
-    // Заглушка, реализуйте метод самостоятельно
-    return false;
+bool Worker::HasSpeciality(WorkerSpeciality speciality) const
+{
+    return specialities_.find(speciality) == specialities_.end() ? false : true;
 }
