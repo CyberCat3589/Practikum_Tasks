@@ -1,16 +1,61 @@
 #include <cassert>
+#include <iostream>
+#include <stdexcept>
 #include <string>
 
 using namespace std;
 
 class House
 {
-    // Реализуйте самостоятельно
+  public:
+    // clang-format off
+    House(int length, int width, int height) : length_(length), width_(width), height_(height){}
+    // clang-format on
+
+    int GetLength() const
+    {
+        return length_;
+    }
+
+    int GetWidth() const
+    {
+        return width_;
+    }
+
+    int GetHeight() const
+    {
+        return height_;
+    }
+
+  private:
+    int length_;
+    int width_;
+    int height_;
 };
 
 class Resources
 {
-    // Реализуйте самостоятельно
+  public:
+    // clang-format off
+    Resources(int brick_count) : count_(brick_count){}
+    // clang-format on
+
+    void TakeBricks(int count)
+    {
+        if (count < 0 || count > count_)
+        {
+            throw out_of_range("Invalid count"s);
+        }
+        count_ -= count;
+    }
+
+    int GetBrickCount() const
+    {
+        return count_;
+    }
+
+  private:
+    int count_;
 };
 
 struct HouseSpecification
@@ -22,7 +67,24 @@ struct HouseSpecification
 
 class Builder
 {
-    // Реализуйте самостоятельно
+  public:
+    // clang-format off
+    Builder(Resources& resources) : resources_(resources){}
+    // clang-format on
+
+    House BuildHouse(HouseSpecification spec)
+    {
+        int bricks_count = (((spec.length + spec.width) * 2) * spec.height) * 32;
+        if (resources_.GetBrickCount() < bricks_count)
+        {
+            throw runtime_error("There are not enough bricks"s);
+        }
+        resources_.TakeBricks(bricks_count);
+        return House(spec.length, spec.width, spec.height);
+    }
+
+  private:
+    Resources& resources_;
 };
 
 int main()
