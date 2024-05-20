@@ -31,24 +31,109 @@ ostream& operator<<(ostream& out, Color color)
 
 class Shape
 {
-    // Напишите реализацию самостоятельно
+  public:
+    Shape(Color color) : color_(color){}
+
+    Color GetColor() const
+    {
+        return color_;
+    }
+
+    virtual double GetArea() const
+    {
+        return area_;
+    }
+
+    virtual string GetType() const
+    {
+        return "Shape";
+    }
+
+    void SetColor(Color color)
+    {
+        color_ = color;
+    }
+
+  private:
+    Color color_;
+    double area_ = 0.0;
 };
 
-class Rectangle
+class Rectangle : public Shape
 {
-    // Напишите реализацию самостоятельно
+  public:
+    Rectangle(double width, double height, Color color) : Shape(color), width_(width), height_(height){}
+
+    double GetWidth() const
+    {
+        return width_;
+    }
+
+    double GetHeight() const
+    {
+        return height_;
+    }
+
+    double GetArea() const override
+    {
+        return width_ * height_;
+    }
+
+    string GetType() const override
+    {
+        return "Rectangle";
+    }
+
+    void SetSize(double width, double height)
+    {
+        width_ = width;
+        height_ = height;
+    }
+
+  private:
+    double width_;
+    double height_;
 };
 
-class Circle
+class Circle : public Shape
 {
-    // Напишите реализацию самостоятельно
+  public:
+    Circle(double radius, Color color) : Shape(color), radius_(radius){}
+
+    double GetRadius() const
+    {
+        return radius_;
+    }
+
+    void SetRadius(double radius)
+    {
+        radius_ = radius;
+    }
+
+    double GetArea() const override
+    {
+        return radius_ * radius_ * M_PI;
+    }
+
+    string GetType() const override
+    {
+        return "Circle";
+    }
+
+  private:
+    double radius_;
 };
 
 // Возвращает суммарную площадь фигур, указатели на которые находятся в переданной коллекции collection
-template <typename ShapeCollection> double CalcSumArea(const ShapeCollection& collection)
+template <typename ShapeCollection> 
+double CalcSumArea(const ShapeCollection& collection)
 {
-    // Заглушка. Напишите реализацию самостоятельно
-    return 0;
+    double sum_area = 0;
+    for(const Shape* shape : collection)
+    {
+        sum_area += shape->GetArea();
+    }
+    return sum_area;
 }
 
 void PrintShapeInfo(const Shape& shape)
