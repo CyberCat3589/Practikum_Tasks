@@ -9,12 +9,28 @@
     побуждает человека танцевать до тех пор, пока уровень уровень удовлетворённости
     не станет больше или равен максимальному значению
 */
-class SatisfactionSupervisor {
+class SatisfactionSupervisor : public PersonObserver
+{
 public:
     // Конструктор принимает значение нижнего и верхнего уровня удовлетворённости
-    SatisfactionSupervisor(int min_satisfaction, int max_satisfaction) {
-        // Напишите реализацию самостоятельно
+    SatisfactionSupervisor(int min_satisfaction, int max_satisfaction) 
+        : min_satisfaction_(min_satisfaction), max_satisfaction_(max_satisfaction){}
+
+    void OnSatisfactionChanged(Person& person, int old_value, int new_value) 
+    {
+ 
+        if (new_value < min_satisfaction_ && (new_value - old_value) < 0) 
+        {
+ 
+            while (person.GetSatisfaction() < max_satisfaction_) 
+            {
+                person.Dance();
+            }
+        }
     }
 
     // Напишите реализацию самостоятельно
+  private:
+    int min_satisfaction_ = 0;
+    int max_satisfaction_ = 0;
 };
