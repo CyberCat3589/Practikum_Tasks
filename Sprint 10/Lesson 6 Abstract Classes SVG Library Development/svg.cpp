@@ -2,43 +2,39 @@
 
 namespace svg
 {
-
 using namespace std::literals;
 
 void Object::Render(const RenderContext& context) const
 {
     context.RenderIndent();
 
-    // Делегируем вывод тега своим подклассам
+    //Делегируем вывод тега классам-потомкам
     RenderObject(context);
 
     context.out << std::endl;
 }
 
-// ---------- Circle ------------------
-
+//--------------------Circle------------------
 Circle& Circle::SetCenter(Point center)
 {
     center_ = center;
     return *this;
 }
 
-Circle& Circle::SetRadius(double radius)
+Circle& Circle::SetRadius(double rad)
 {
-    radius_ = radius;
+    radius_ = rad;
     return *this;
 }
 
 void Circle::RenderObject(const RenderContext& context) const
 {
-    auto& out = context.out;
-    out << "<circle cx=\""sv << center_.x << "\" cy=\""sv << center_.y << "\" "sv;
-    out << "r=\""sv << radius_ << "\" "sv;
-    out << "/>"sv;
+    context.out << R"(<circle cx=")" << center_.x << R"(" )"
+                << R"(cy=")" << center_.y << R"(" )"
+                << R"(r=")" << radius_ << R"("/>)";
 }
 
-// ---------- Polyline ------------------
-
+//--------------------Polyline------------------
 Polyline& Polyline::AddPoint(Point point)
 {
     points_.emplace_back(point);
@@ -47,28 +43,23 @@ Polyline& Polyline::AddPoint(Point point)
 
 void Polyline::RenderObject(const RenderContext& context) const
 {
-
     std::ostream& out = context.out;
     out << R"(<polyline points=")";
-
     for (size_t i = 0; i < points_.size(); ++i)
     {
         out << points_[i].x << ","sv << points_[i].y;
-
         if (i + 1 != points_.size())
         {
             out << " "sv;
         }
     }
-
-    out << R"(")" << " />"sv;
+    out << R"("/>)";
 }
 
-// ---------- Text ------------------
-
+//--------------------Text------------------
 Text& Text::SetPosition(Point pos)
 {
-    anchor_ = pos;
+    position_ = pos;
     return *this;
 }
 
@@ -78,133 +69,118 @@ Text& Text::SetOffset(Point offset)
     return *this;
 }
 
-Text& Text::SetFontSize(uint32_t size)
+Text& Text::SetFontFamily(std::string font_family)
 {
-    font_size_ = size;
+    font_family_ = font_family;
     return *this;
 }
 
-Text& Text::SetFontFamily(std::string font_family)
+Text& Text::SetData(std::string str)
 {
-    font_family_ = std::move(font_family);
+    data_ = str;
+    return *this;
+}
+
+Text& Text::SetFontSize(uint32_t font_size)
+{
+    font_size_ = font_size;
     return *this;
 }
 
 Text& Text::SetFontWeight(std::string font_weight)
 {
-    font_weight_ = std::move(font_weight);
-    return *this;
-}
-
-Text& Text::SetData(std::string data)
-{
-    data_ = std::move(data);
+    font_weight_ = font_weight;
     return *this;
 }
 
 std::string Text::DeleteSpaces(const std::string& str)
 {
     if (str.empty())
-    {
         return {};
-    }
-    else
-    {
-        auto left = str.find_first_not_of(' ');
-        auto right = str.find_last_not_of(' ');
-        return str.substr(left, right - left + 1);
-    }
+    size_t left = str.find_first_not_of(' ');
+    size_t right = str.find_last_not_of(' ');
+    return str.substr(left, right - left + 1);
 }
 
-std::string Text::EscapeCharacters(const std::string& str)
+std::string Text::ScreenSymbols(const std::string& str)
 {
-
-    std::string out;
-
+    std::string out_str;
     for (char ch : str)
     {
-
         if (ch == '"')
         {
-            out += "&quot;"sv;
+            out_str += "&quot;"sv;
             continue;
         }
-        else if (ch == '`' || ch == '\'')
+        else if (ch == '\'' || ch == '`')
         {
-            out += "&apos;"sv;
+            out_str += "&apos;"sv;
             continue;
         }
         else if (ch == '<')
         {
-            out += "&lt;"sv;
+            out_str += "&lt;"sv;
             continue;
         }
         else if (ch == '>')
         {
-            out += "&gt;"sv;
+            out_str += "&gt;"sv;
             continue;
         }
         else if (ch == '&')
         {
-            out += "&amp;"sv;
+            out_str += "&amp;"sv;
             continue;
         }
-        else
-        {
-        }
-
-        out += ch;
+        out_str += ch;
     }
-
-    return out;
+    return out_str;
 }
 
 void Text::RenderObject(const RenderContext& context) const
 {
-
     std::ostream& out = context.out;
-
-    out << R"(<text x=")" << anchor_.x << R"(" y=")" << anchor_.y << R"(" )" << R"(dx=")" << offset_.x << R"(" dy=")" << offset_.y
-        << R"(" )" << R"(font-size=")" << font_size_ << R"(")";
+    out << R"(<text x=")" << position_.x << R"(" y=")" << position_.y << R"(" )"
+        << R"(dx=")" << offset_.x << R"(" dy=")" << offset_.y << R"(" )"
+        << R"(font-size=")" << font_size_ << R"(" )";
 
     if (!font_family_.empty())
     {
-        out << R"( font-family=")" << font_family_ << R"(")";
+        out << R"(font-family=")" << font_family_ << R"(" )";
     }
 
     if (!font_weight_.empty())
     {
-        out << R"( font-weight=")" << font_weight_ << R"(")";
+        out << R"(font-weight=")" << font_weight_ << R"(")";
     }
 
-    out << ">"sv << DeleteSpaces(EscapeCharacters(data_)) << "</text>"sv;
+    out << ">"sv << DeleteSpaces(ScreenSymbols(data_)) << "</text>"sv;
 }
 
-// ---------- Document ------------------
-
+//--------------------Document------------------
 void Document::AddPtr(std::unique_ptr<Object>&& obj)
 {
     objects_.emplace_back(std::move(obj));
 }
 
-void Document::Render(std::ostream& out) const
+void Document::Render(std::ostream& out)
 {
+    std::string_view xml = R"(<?xml version="1.0" encoding="UTF-8" ?>)";
+    std::string_view svg = R"(<svg xmlns="http://www.w3.org/2000/svg" version="1.1">)";
+
     int indent = 2;
     int indent_step = 2;
 
-    RenderContext context(out, indent_step, indent);
+    RenderContext context(std::cout, indent_step, indent);
 
-    const std::string_view xml = R"(<?xml version="1.0" encoding="UTF-8" ?>)";
-    const std::string_view svg = R"(<svg xmlns="http://www.w3.org/2000/svg" version="1.1">)";
+    out << xml << '\n' << svg << '\n';
 
-    out << xml << "\n"sv << svg << "\n"sv;
-
-    for (const auto& object : objects_)
+    for (const auto& obj : objects_)
     {
-        object->Render(context);
+        obj->Render(context);
     }
 
-    out << "</svg>"sv;
+    out << "</svg>";
 }
 
 }  // namespace svg

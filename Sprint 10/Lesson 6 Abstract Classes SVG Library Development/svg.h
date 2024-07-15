@@ -1,5 +1,4 @@
 #pragma once
-
 #include <cstdint>
 #include <iostream>
 #include <memory>
@@ -8,19 +7,26 @@
 
 namespace svg
 {
+
 struct Point
 {
     Point() = default;
-    Point(double x, double y) : x(x), y(y){}
+    Point(double x, double y) : x(x), y(y)
+    {
+    }
+
     double x = 0;
     double y = 0;
 };
 
 struct RenderContext
 {
-    RenderContext(std::ostream& out) : out(out){}
-
-    RenderContext(std::ostream& out, int indent_step, int indent = 0) : out(out), indent_step(indent_step), indent(indent){}
+    RenderContext(std::ostream& out) : out(out)
+    {
+    }
+    RenderContext(std::ostream& out, int indent_step, int indent) : out(out), indent_step(indent_step), indent(indent)
+    {
+    }
 
     RenderContext Indented() const
     {
@@ -53,62 +59,70 @@ class Object
 class Circle final : public Object
 {
   public:
+    Circle() = default;
     Circle& SetCenter(Point center);
     Circle& SetRadius(double radius);
 
   private:
-    Point center_;
-    double radius_ = 1.0;
-
     void RenderObject(const RenderContext& context) const override;
+
+    Point center_ = {0.0, 0.0};
+    double radius_ = 1.0;
 };
 
 class Polyline final : public Object
 {
   public:
+    Polyline() = default;
     Polyline& AddPoint(Point point);
 
   private:
-    std::vector<Point> points_;
     void RenderObject(const RenderContext& context) const override;
+
+    std::vector<Point> points_;
 };
 
 class Text final : public Object
 {
   public:
+    Text() = default;
+
     Text& SetPosition(Point pos);
     Text& SetOffset(Point offset);
-    Text& SetFontSize(uint32_t size);
     Text& SetFontFamily(std::string font_family);
-    Text& SetFontWeight(std::string font_weight);
     Text& SetData(std::string data);
+    Text& SetFontSize(uint32_t size);
+    Text& SetFontWeight(std::string font_weight);
 
   private:
-    Point anchor_;
-    Point offset_;
-    std::string font_family_;
-    std::string font_weight_;
-    uint32_t font_size_ = 1;
-    std::string data_;
+    void RenderObject(const RenderContext& context) const override;
 
     static std::string DeleteSpaces(const std::string& str);
-    static std::string EscapeCharacters(const std::string& str);
+    static std::string ScreenSymbols(const std::string& str);
 
-    void RenderObject(const RenderContext& context) const override;
+    Point position_ = {0.0, 0.0};
+    Point offset_ = {0.0, 0.0};
+    uint32_t font_size_ = 1;
+    std::string font_family_;
+    std::string data_;
+    std::string font_weight_;
 };
 
 class Document
 {
   public:
+    Document() = default;
+
     template <typename Obj> void Add(Obj obj)
     {
         objects_.emplace_back(std::make_unique<Obj>(std::move(obj)));
     }
 
-    void AddPtr(std::unique_ptr<Object>&& obj);
-    void Render(std::ostream& out) const;
+    void AddPtr(std::unique_ptr<Object>&& ptr);
+    void Render(std::ostream& out);
 
   private:
     std::vector<std::unique_ptr<Object>> objects_;
 };
-}  // end namespace svg
+
+}  // namespace svg
