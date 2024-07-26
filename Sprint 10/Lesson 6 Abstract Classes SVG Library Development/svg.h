@@ -3,9 +3,13 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <string>
+#include <optional>
 
 namespace svg
 {
+
+using namespace std::literals;
 
 using Color = std::string;
 
@@ -18,25 +22,27 @@ enum class StrokeLineCap
   SQUARE
 };
 
-std::ostream& operator<<(std::ostream& out, const StrokeLineCap& line_cap)
+inline std::ostream& operator<<(std::ostream& out, const StrokeLineCap& line_cap)
 {
   switch (line_cap)
   {
     case StrokeLineCap::BUTT:
     {
-      return out << "butt"sv;
+      out << "butt"sv;
+      break;
     }
     case StrokeLineCap::ROUND:
     {
-      return out << "round"sv;
+      out << "round"sv;
+      break;
     }
     case StrokeLineCap::SQUARE:
     {
-      return out << "square"sv;
+      out << "square"sv;
+      break;
     }
-    default:
-      return out;
   }
+  return out;
 }
 
 enum class StrokeLineJoin
@@ -48,33 +54,37 @@ enum class StrokeLineJoin
   ARCS
 };
 
-std::ostream& operator<<(std::ostream& out, const StrokeLineJoin& line_join)
+inline std::ostream& operator<<(std::ostream& out, const StrokeLineJoin& line_join)
 {
   switch (line_join)
   {
     case StrokeLineJoin::ARCS:
     {
-      return out << "arcs"sv;
+      out << "arcs"sv;
+      break;
     }
     case StrokeLineJoin::BEVEL:
     {
-      return out << "bevel"sv;
+      out << "bevel"sv;
+      break;
     }
     case StrokeLineJoin::MITER:
     {
-      return out << "miter"sv;
+      out << "miter"sv;
+      break;
     }
     case StrokeLineJoin::MITER_CLIP:
     {
-      return out << "miter-clip"sv;
+      out << "miter-clip"sv;
+      break;
     }
     case StrokeLineJoin::ROUND:
     {
-      return out << "round"sv;
+      out << "round"sv;
+      break;
     }
-    default:
-      return out;
   }
+  return out;
 }
 
 struct Point
@@ -123,18 +133,65 @@ template <typename Owner>
 class PathProps
 {
 public:
-  Owner& SetFillColor(Color color);
-  Owner& SetStrokeColor(Color color);
-  Owner& SetStrokeWidth(double width);
-  Owner& SetStrokeLineCap(SetStrokeLineCap line_cap);
-  Owner& SetStrokeLineJoin(SetStrokeLineJoin line_join);
+  Owner& SetFillColor(Color color)
+  {
+    fill_color_ = color;
+    return AsOwner();
+  }
+
+  Owner& SetStrokeColor(Color color)
+  {
+    stroke_color_ = color;
+    return AsOwner();
+  }
+
+  Owner& SetStrokeWidth(double width)
+  {
+    width_ = width;
+    return AsOwner();
+  }
+
+  Owner& SetStrokeLineCap(StrokeLineCap line_cap)
+  {
+    line_cap_ = line_cap;
+    return AsOwner();
+  }
+
+  Owner& SetStrokeLineJoin(StrokeLineJoin line_join)
+  {
+    line_join_ = line_join;
+    return AsOwner();
+  }
 
 protected:
   ~PathProps() = default;
 
-  void RenderAttrs(std::ostream out) const
+  void RenderAttrs(std::ostream& out) const
   {
-    out << "Attributes"s;//заглушка
+    if(fill_color_ != std::nullopt)
+    {
+      out << " fill=\""sv << *fill_color_ << "\""sv;
+    }
+
+    if(stroke_color_ != std::nullopt)
+    {
+      out << " stroke=\""sv << *stroke_color_ << "\""sv;
+    }
+    
+    if(width_ != std::nullopt)
+    {
+      out << " stroke-width=\""sv << *width_ << "\""sv;
+    }
+    
+    if(line_cap_ != std::nullopt)
+    {
+      out << " stroke-linecap=\""sv << *line_cap_ << "\""sv;
+    }
+    
+    if(line_join_ != std::nullopt)
+    {
+      out << " stroke-linejoin=\""sv << *line_join_ << "\""sv;
+    }
   }
 
 private:
@@ -143,14 +200,14 @@ private:
     return static_cast<Owner&>(*this);
   }
 
-  Color fill_color_ = NoneColor;
-  Color stroke_color_ = NoneColor;
-  double width_;
-  StrokeLineCap line_cap_;
-  SetStrokeLineJoin line_join;
+  std::optional<Color> fill_color_;//цвет заливки
+  std::optional<Color> stroke_color_;//цвет обводки
+  std::optional<double> width_;//толщина обводки
+  std::optional<StrokeLineCap> line_cap_;//тип формы конца линии
+  std::optional<StrokeLineJoin> line_join_;//тип формы соединения линий
 };
 
-class Circle final : public Object
+class Circle final : public Object, public PathProps<Circle>
 {
 public:
   Circle() = default;
@@ -164,7 +221,7 @@ private:
   double radius_ = 1.0;
 };
 
-class Polyline final : public Object
+class Polyline final : public Object, public PathProps<Polyline>
 {
 public:
   Polyline() = default;
@@ -176,7 +233,7 @@ private:
   std::vector<Point> points_;
 };
 
-class Text final : public Object
+class Text final : public Object, public PathProps<Text>
 {
 public:
   Text() = default;

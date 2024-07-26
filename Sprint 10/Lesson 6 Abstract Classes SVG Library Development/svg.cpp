@@ -29,9 +29,12 @@ Circle& Circle::SetRadius(double rad)
 
 void Circle::RenderObject(const RenderContext& context) const
 {
-    context.out << R"(<circle cx=")" << center_.x << R"(" )"
+    std::ostream& out = context.out;
+    out << R"(<circle cx=")" << center_.x << R"(" )"
     << R"(cy=")" << center_.y << R"(" )"
-    << R"(r=")" << radius_ << R"("/>)";
+    << R"(r=")" << radius_ << R"(")";
+    RenderAttrs(out);
+    out << R"(/>)";
 }
 
 //--------------------Polyline------------------
@@ -53,7 +56,9 @@ void Polyline::RenderObject(const RenderContext& context) const
             out << " "sv;
         }
     }
-    out << R"("/>)";
+    out << "\"";
+    RenderAttrs(out);
+    out << R"(/>)";
 }
 
 //--------------------Text------------------
@@ -139,7 +144,9 @@ std::string Text::ScreenSymbols(const std::string& str)
 void Text::RenderObject(const RenderContext& context) const
 {
     std::ostream& out = context.out;
-    out << R"(<text x=")" << position_.x << R"(" y=")" << position_.y << R"(" )"
+    out << R"(<text)";
+    RenderAttrs(out);
+    out << R"( x=")" << position_.x << R"(" y=")" << position_.y << R"(" )"
     << R"(dx=")" << offset_.x << R"(" dy=")" << offset_.y << R"(" )"
     << R"(font-size=")" << font_size_ << R"(" )";
 
