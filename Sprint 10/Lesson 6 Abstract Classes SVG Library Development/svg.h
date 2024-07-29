@@ -5,15 +5,54 @@
 #include <vector>
 #include <string>
 #include <optional>
+#include <variant>
 
 namespace svg
 {
 
 using namespace std::literals;
 
-using Color = std::string;
+struct Rgb
+{
+  Rgb() = default;
+  Rgb(uint8_t r, uint8_t g, uint8_t b) : red(r), green(g), blue(b) {}
+  uint8_t red = 0;
+  uint8_t green = 0;
+  uint8_t blue = 0;
+};
+
+struct Rgba
+{
+  Rgba() = default;
+  Rgba(uint8_t r, uint8_t g, uint8_t b, double a) : red(r), green(g), blue(b), opacity(a) {}
+  uint8_t red = 0;
+  uint8_t green = 0;
+  uint8_t blue = 0;
+  double opacity = 1.0;
+};
+
+using Color = std::variant<std::monostate, std::string, Rgb, Rgba>;
 
 inline const Color NoneColor{"none"};
+
+struct ColorPrinter
+{
+  std::ostream& out;
+
+  void operator()(std::monostate) const;
+  
+  void operator()(std::string color) const;
+  
+  void operator()(Rgb color) const;
+  
+  void operator()(Rgba color) const;
+};
+
+inline std::ostream& operator<<(std::ostream& out, const Color& color)
+{
+  std::visit(ColorPrinter{out}, color);
+  return out;
+}
 
 enum class StrokeLineCap
 {
@@ -106,14 +145,8 @@ struct RenderContext
     return {out, indent_step, indent + indent_step};
   }
 
-  void RenderIndent() const
-  {
-    for (int i = 0; i < indent; ++i)
-    {
-      out.put(' ');
-    }
-  }
-
+  void RenderIndent() const;
+  
   std::ostream& out;
   int indent_step = 0;
   int indent = 0;
